@@ -101,3 +101,43 @@ export {
   ERA_CARD_ENTRY_MS, ERA_CARD_HOLD_MS, ERA_CARD_EXIT_MS,
 } from './era-screen.js';
 export type { EraScreenData, EraStatsSnapshot } from './era-screen.js';
+
+// Task 3.9 — FAB Dual-Arc UI (extends Task 3.4)
+export {
+  getComboEligiblePowerIds, computeDualArcLayout,
+  DualArcFABMenu, createDualArcFABState,
+  buildPowerUnlockToastText, shouldShowExpander,
+} from './fab-menu.js';
+export type { DualArcFABState } from './fab-menu.js';
+
+// Task 3.12 — Voice Map Icons + Character Profiles
+export {
+  VOICE_TYPE_COLORS, VOICE_PRAYER_PULSE_COLOR,
+  buildVoiceIcons, buildVoiceIcon, buildVoiceProfile, getLoyaltyColor,
+  getPrimaryPetitioningVoice,
+  buildVoiceEmergenceToastText, buildVoiceDeathToastText, buildVoiceBetrayalToastText,
+} from './voice-profiles.js';
+export type { VoiceIconData, VoiceProfileData } from './voice-profiles.js';
+
+// Task 3.13 — Combo Divine Chain Toast
+export {
+  COMBO_DISCOVERY_TEXT, COMBO_NAMES,
+  buildComboToastData, FIRST_COMBO_TOOLTIP_TEXT,
+  WHISPER_FEEDBACK, getWhisperFeedbackText,
+} from './combo-display.js';
+export type { ComboToastData, WhisperOutcome, WhisperFeedbackText } from './combo-display.js';
+
+// Task 3.14 — Petition UI in Bottom Sheet
+export {
+  buildPetitionUI, buildPetitionCounterState,
+  isPetitionExpired, getAutoDenyLoyaltyLoss,
+} from './petition-ui.js';
+export type { PetitionUIData, PetitionFulfillAction, PetitionCounterState, HereticPetitionOptions } from './petition-ui.js';
+
+// Task 3.15 — Harbinger Overlay and Indicators (extends Task 3.7)
+export {
+  buildAnomalyOverlayData, isAnomalyLayerUnlocked,
+  buildHarbingerVFXData,
+  HARBINGER_VFX_COLORS,
+} from './divine-overlay.js';
+export type { AnomalyRegionData, AnomalyIntensity, HarbingerVFXData, HarbingerVFXType } from './divine-overlay.js';

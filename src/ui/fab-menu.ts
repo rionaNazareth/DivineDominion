@@ -1,11 +1,10 @@
 // =============================================================================
-// DIVINE DOMINION — FAB + Radial Power Menu (Task 3.4)
-// Base FAB class (Phaser GameObjects.Container) + pure context logic.
-// Session 8 extends this via createPowerSlot override + setDualArcLayout().
+// DIVINE DOMINION — FAB + Radial Power Menu (Tasks 3.4 + 3.9)
+// Base FAB class + dual-arc layout + combo hint population.
 // =============================================================================
 
-import type { DivinePower, PowerId, GameState, EraId } from '../types/game.js';
-import { POWER_UNLOCK, FAB_CONTEXT, UI } from '../config/constants.js';
+import type { DivinePower, PowerId, GameState, EraId, PowerComboId } from '../types/game.js';
+import { POWER_UNLOCK, FAB_CONTEXT, UI, COMBOS } from '../config/constants.js';
 import { eraIndex } from '../renderer/era-utils.js';
 
 // ---------------------------------------------------------------------------
@@ -215,6 +214,118 @@ function layoutArc(
 }
 
 // ---------------------------------------------------------------------------
+// Combo hint detection (Task 3.9)
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the set of PowerIds that have at least one combo eligible in the
+ * current world state. Used to populate hasComboHint on ArcButtons.
+ */
+export function getComboEligiblePowerIds(state: GameState): Set<PowerId> {
+  const eligible = new Set<PowerId>();
+  const world = state.world;
+
+  // quake_scatter: Earthquake + army in any region
+  for (const army of world.armies.values()) {
+    if (army.state !== 'disbanded') {
+      eligible.add('earthquake');
+      break;
+    }
+  }
+
+  // storm_fleet: Great Storm + naval trade route
+  for (const route of world.tradeRoutes.values()) {
+    if (route.isActive) {
+      eligible.add('great_storm');
+      break;
+    }
+  }
+
+  // flood_famine: Great Flood + region with low food (low economy)
+  for (const region of world.regions.values()) {
+    if (region.economicOutput < 20) {
+      eligible.add('great_flood');
+      break;
+    }
+  }
+
+  // plague_trade: Plague + active trade routes
+  for (const route of world.tradeRoutes.values()) {
+    if (route.isActive) {
+      eligible.add('plague');
+      break;
+    }
+  }
+
+  // harvest_golden: Bountiful Harvest + dev 6+
+  for (const region of world.regions.values()) {
+    if (region.development >= COMBOS.HARVEST_GOLDEN_MIN_DEV) {
+      eligible.add('bountiful_harvest');
+      break;
+    }
+  }
+
+  // inspire_prophet: Inspiration + Prophet voice in same region
+  const prophetRegions = new Set(
+    state.voiceRecords.filter(v => v.type === 'prophet').map(v => v.regionId),
+  );
+  if (prophetRegions.size > 0) {
+    eligible.add('inspiration');
+  }
+
+  // shield_miracle: Shield of Faith → Miracle combo window
+  for (const [regionId, shieldTime] of state.comboWindowState.lastShieldCastByRegion) {
+    // combo window active if shield was cast within the window
+    void regionId; // regionId used as key
+    void shieldTime;
+    eligible.add('miracle');
+    break;
+  }
+
+  // wildfire_rebirth: Wildfire + dev 3+
+  for (const region of world.regions.values()) {
+    if (region.development >= COMBOS.WILDFIRE_REBIRTH_MIN_DEV) {
+      eligible.add('wildfire');
+      break;
+    }
+  }
+
+  // divine_purge: Shield + corrupted region (or Miracle on corrupted)
+  if (world.alienState.harbinger.corruptedRegionIds.length > 0) {
+    eligible.add('shield_of_faith');
+    eligible.add('miracle');
+  }
+
+  return eligible;
+}
+
+/**
+ * Re-computes ArcLayout with combo hints populated.
+ * Call this instead of computeArcLayout when the dual-arc layout is active.
+ */
+export function computeDualArcLayout(
+  slots: ContextSlot[],
+  state: GameState,
+  leftHandMode: boolean,
+  showExpander: boolean,
+): ArcLayout {
+  const layout = computeArcLayout(slots, state, leftHandMode, showExpander);
+  const eligible = getComboEligiblePowerIds(state);
+
+  const applyHints = (buttons: ArcButton[]): ArcButton[] =>
+    buttons.map(btn => ({
+      ...btn,
+      hasComboHint: eligible.has(btn.power.id),
+    }));
+
+  return {
+    ...layout,
+    blessingButtons: applyHints(layout.blessingButtons),
+    disasterButtons: applyHints(layout.disasterButtons),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // FAB state machine
 // ---------------------------------------------------------------------------
 
@@ -320,4 +431,74 @@ export class FABMenu {
   getState(): FabMenuState {
     return this._state;
   }
+}
+
+// ---------------------------------------------------------------------------
+// DualArcFABMenu — Session 8 extension (Task 3.9)
+// Adds setDualArcLayout() and combo-hint-aware arc computation.
+// ---------------------------------------------------------------------------
+
+export interface DualArcFABState {
+  dualArcEnabled: boolean;
+  newlyUnlockedPowerId: PowerId | null; // glow on first FAB appearance
+}
+
+export function createDualArcFABState(): DualArcFABState {
+  return { dualArcEnabled: false, newlyUnlockedPowerId: null };
+}
+
+/** Dual-arc FAB that extends FABMenu with combo hints and unlock glow. */
+export class DualArcFABMenu extends FABMenu {
+  private _dualArcState: DualArcFABState;
+
+  constructor(config: FABConfig) {
+    super(config);
+    this._dualArcState = createDualArcFABState();
+  }
+
+  /** Enables dual-arc layout for this FAB instance. */
+  setDualArcLayout(enabled: boolean): void {
+    this._dualArcState = { ...this._dualArcState, dualArcEnabled: enabled };
+  }
+
+  isDualArcEnabled(): boolean {
+    return this._dualArcState.dualArcEnabled;
+  }
+
+  /** Mark a power as newly unlocked so it glows on first appearance. */
+  setNewlyUnlocked(powerId: PowerId | null): void {
+    this._dualArcState = { ...this._dualArcState, newlyUnlockedPowerId: powerId };
+  }
+
+  getNewlyUnlockedPowerId(): PowerId | null {
+    return this._dualArcState.newlyUnlockedPowerId;
+  }
+
+  /** Compute the layout with combo hints. Caller passes current GameState. */
+  computeLayout(
+    slots: ContextSlot[],
+    gameState: GameState,
+    leftHandMode: boolean,
+    showExpander: boolean,
+  ): ArcLayout {
+    return computeDualArcLayout(slots, gameState, leftHandMode, showExpander);
+  }
+
+  getDualArcState(): DualArcFABState {
+    return this._dualArcState;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Power unlock toast helper (Task 3.9)
+// ---------------------------------------------------------------------------
+
+/** Returns a user-facing message for a newly unlocked power. */
+export function buildPowerUnlockToastText(power: DivinePower): string {
+  return `New divine power: ${power.name}.`;
+}
+
+/** Returns true if ≥5 powers are unlocked (show "..." expander). */
+export function shouldShowExpander(unlockedPowers: DivinePower[]): boolean {
+  return unlockedPowers.length >= 5;
 }

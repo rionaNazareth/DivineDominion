@@ -1,7 +1,9 @@
 // =============================================================================
-// DIVINE DOMINION — UI Module Tests (Phase 3, Session 7)
+// DIVINE DOMINION — UI Module Tests (Phase 3, Sessions 7 + 8)
 // Tests: 3.1 Menu · 3.2 Commandment Select · 3.3 HUD · 3.4 FAB
 //        3.5 Event Notifications · 3.6 Bottom Sheet · 3.7 Divine Overlay · 3.8 Era Screen
+//        3.9 Dual-Arc FAB · 3.10 Whispers · 3.11 Prayer Counter · 3.12 Voices
+//        3.13 Combo Toast · 3.14 Petition UI · 3.15 Harbinger Overlay
 // All tests are pure-logic (no DOM, no Phaser).
 // =============================================================================
 
@@ -75,9 +77,36 @@ import {
   ERA_SCREEN_BACKGROUNDS, ERA_MORPH_DURATION_MS, ERA_CARD_ENTRY_MS,
 } from '../era-screen.js';
 
+// --- Session 8 imports ---
+import {
+  getComboEligiblePowerIds, computeDualArcLayout,
+  DualArcFABMenu, buildPowerUnlockToastText, shouldShowExpander,
+} from '../fab-menu.js';
+
+import {
+  VOICE_TYPE_COLORS, buildVoiceIcon, buildVoiceProfile, getLoyaltyColor,
+  getPrimaryPetitioningVoice, buildVoiceEmergenceToastText,
+  buildVoiceDeathToastText, buildVoiceBetrayalToastText,
+} from '../voice-profiles.js';
+
+import {
+  COMBO_DISCOVERY_TEXT, COMBO_NAMES, buildComboToastData,
+  FIRST_COMBO_TOOLTIP_TEXT, getWhisperFeedbackText,
+} from '../combo-display.js';
+
+import {
+  buildPetitionUI, buildPetitionCounterState,
+  isPetitionExpired, getAutoDenyLoyaltyLoss,
+} from '../petition-ui.js';
+
+import {
+  buildAnomalyOverlayData, isAnomalyLayerUnlocked,
+  buildHarbingerVFXData, HARBINGER_VFX_COLORS,
+} from '../divine-overlay.js';
+
 // --- Test fixtures ---
-import type { Commandment, CommandmentCategory, GameState, Region, Nation, DivinePower, GameEvent, EraId } from '../../types/game.js';
-import { ERAS } from '../../config/constants.js';
+import type { Commandment, CommandmentCategory, GameState, Region, Nation, DivinePower, GameEvent, EraId, FollowerVoice, Petition } from '../../types/game.js';
+import { ERAS, VOICES } from '../../config/constants.js';
 
 function makeCommandment(id: string, category: CommandmentCategory, tensionsWith: string[] = []): Commandment {
   return {
@@ -944,5 +973,762 @@ describe('UI-058 session milestone tracker', () => {
     const { toast } = checkSessionMilestone(tracker, 3 * 60 * 1000); // 3 minutes later
     expect(toast).not.toBeNull();
     expect(toast!.style).toBe('session_milestone');
+  });
+});
+
+// =============================================================================
+// Session 8 Tests — UI-059 to UI-100
+// =============================================================================
+
+// ---------------------------------------------------------------------------
+// Helpers for Session 8 tests
+// ---------------------------------------------------------------------------
+
+function makeVoice(
+  id: string,
+  type: FollowerVoice['type'],
+  regionId = 'region_1',
+  loyalty = 0.7,
+  petition: Petition | null = null,
+): FollowerVoice {
+  return {
+    id,
+    type,
+    name: `Voice ${id}`,
+    regionId,
+    loyalty,
+    birthYear: 1600,
+    lifespanYears: 150,
+    eraBorn: 'renaissance',
+    lineageOf: null,
+    currentPetition: petition,
+  };
+}
+
+function makePetition(voiceId: string, type = 'bless_region', expiryTime = 9999): Petition {
+  return {
+    voiceId,
+    type,
+    requestText: `Please help ${voiceId}.`,
+    expiryTime,
+  };
+}
+
+function makeArmyInRegion(state: GameState, regionId: string): GameState {
+  const army = {
+    id: 'army_1',
+    nationId: 'nation_1',
+    strength: 5000,
+    morale: 0.8,
+    currentRegionId: regionId,
+    state: 'garrisoned' as const,
+    commander: null,
+    supplyRange: 3,
+  };
+  const armies = new Map(state.world.armies);
+  armies.set('army_1', army);
+  return { ...state, world: { ...state.world, armies } };
+}
+
+function makeTradeRoute(state: GameState): GameState {
+  const route = {
+    id: 'route_1',
+    regionA: 'region_1',
+    regionB: 'region_2',
+    distance: 2,
+    volume: 0.8,
+    isActive: true,
+  };
+  const tradeRoutes = new Map(state.world.tradeRoutes);
+  tradeRoutes.set('route_1', route);
+  return { ...state, world: { ...state.world, tradeRoutes } };
+}
+
+function makeRegionWithDev(state: GameState, regionId: string, dev: number): GameState {
+  const region: Region = {
+    id: regionId,
+    nationId: 'nation_1',
+    position: { x: 0, y: 0 },
+    vertices: [],
+    terrain: 'plains',
+    population: 10000,
+    development: dev,
+    happiness: 0.7,
+    economicOutput: 100,
+    faithStrength: 0.5,
+    religiousInfluence: [],
+    dominantReligion: 'player_faith',
+    hasCity: true,
+    cityLevel: 1,
+    adjacentRegionIds: [],
+    activeEffects: [],
+    isQuarantined: false,
+    isCapital: false,
+  };
+  const regions = new Map(state.world.regions);
+  regions.set(regionId, region);
+  return { ...state, world: { ...state.world, regions } };
+}
+
+// =============================================================================
+// UI-059 to UI-065 — Task 3.9 FAB Dual-Arc UI
+// =============================================================================
+
+describe('UI-059 getComboEligiblePowerIds — empty world', () => {
+  it('returns empty set when world has no armies/routes/dev', () => {
+    const state = makeMinimalGameState();
+    const eligible = getComboEligiblePowerIds(state);
+    // Without armies, routes, or high-dev regions, only whisper-related combos can fire
+    // In empty state: shield_miracle window is empty, no voices, no corruption
+    expect(eligible.size).toBe(0);
+  });
+});
+
+describe('UI-060 getComboEligiblePowerIds — army in region enables quake_scatter', () => {
+  it('earthquake becomes eligible when an army is present', () => {
+    let state = makeMinimalGameState();
+    state = makeArmyInRegion(state, 'region_1');
+    const eligible = getComboEligiblePowerIds(state);
+    expect(eligible.has('earthquake')).toBe(true);
+  });
+});
+
+describe('UI-061 getComboEligiblePowerIds — trade route enables storm_fleet and plague_trade', () => {
+  it('great_storm and plague both eligible with active route', () => {
+    let state = makeMinimalGameState();
+    state = makeTradeRoute(state);
+    const eligible = getComboEligiblePowerIds(state);
+    expect(eligible.has('great_storm')).toBe(true);
+    expect(eligible.has('plague')).toBe(true);
+  });
+});
+
+describe('UI-062 getComboEligiblePowerIds — dev 6+ enables harvest_golden', () => {
+  it('bountiful_harvest becomes eligible at dev 6+', () => {
+    let state = makeMinimalGameState();
+    state = makeRegionWithDev(state, 'region_1', 6);
+    const eligible = getComboEligiblePowerIds(state);
+    expect(eligible.has('bountiful_harvest')).toBe(true);
+  });
+  it('bountiful_harvest NOT eligible at dev 5', () => {
+    let state = makeMinimalGameState();
+    state = makeRegionWithDev(state, 'region_1', 5);
+    const eligible = getComboEligiblePowerIds(state);
+    expect(eligible.has('bountiful_harvest')).toBe(false);
+  });
+});
+
+describe('UI-063 getComboEligiblePowerIds — prophet voice enables inspire_prophet', () => {
+  it('inspiration eligible when prophet voice exists', () => {
+    const state: GameState = {
+      ...makeMinimalGameState(),
+      voiceRecords: [makeVoice('v1', 'prophet', 'region_1')],
+    };
+    const eligible = getComboEligiblePowerIds(state);
+    expect(eligible.has('inspiration')).toBe(true);
+  });
+});
+
+describe('UI-064 computeDualArcLayout — combo hints populated', () => {
+  it('blessing buttons have hasComboHint=true when combo eligible', () => {
+    let state = makeMinimalGameState();
+    state = makeArmyInRegion(state, 'region_1');
+    // Add earthquake to powers
+    const earthquake: DivinePower = {
+      id: 'earthquake', name: 'Earthquake', type: 'disaster',
+      cost: 4, cooldownMinutes: 6, durationGameYears: null, description: '',
+    };
+    const slots = [{ power: earthquake, reason: 'cheapest_disaster' as const }];
+    const layout = computeDualArcLayout(slots, state, false, false);
+    const eqBtn = layout.disasterButtons.find(b => b.power.id === 'earthquake');
+    expect(eqBtn?.hasComboHint).toBe(true);
+  });
+});
+
+describe('UI-065 DualArcFABMenu.setDualArcLayout', () => {
+  it('starts with dual arc disabled, can enable', () => {
+    const fab = new DualArcFABMenu({
+      powers: [],
+      onPowerSelect: () => {},
+    });
+    expect(fab.isDualArcEnabled()).toBe(false);
+    fab.setDualArcLayout(true);
+    expect(fab.isDualArcEnabled()).toBe(true);
+    fab.setDualArcLayout(false);
+    expect(fab.isDualArcEnabled()).toBe(false);
+  });
+  it('tracks newly unlocked power', () => {
+    const fab = new DualArcFABMenu({ powers: [], onPowerSelect: () => {} });
+    fab.setNewlyUnlocked('miracle');
+    expect(fab.getNewlyUnlockedPowerId()).toBe('miracle');
+    fab.setNewlyUnlocked(null);
+    expect(fab.getNewlyUnlockedPowerId()).toBeNull();
+  });
+});
+
+describe('UI-066 buildPowerUnlockToastText', () => {
+  it('includes power name in toast text', () => {
+    const power: DivinePower = {
+      id: 'miracle', name: 'Miracle', type: 'blessing',
+      cost: 4, cooldownMinutes: 6, durationGameYears: null, description: '',
+    };
+    const text = buildPowerUnlockToastText(power);
+    expect(text).toContain('Miracle');
+  });
+});
+
+describe('UI-067 shouldShowExpander', () => {
+  it('false when < 5 powers', () => {
+    const powers: DivinePower[] = Array.from({ length: 4 }, (_, i) => ({
+      id: `p${i}`, name: `Power ${i}`, type: 'blessing' as const,
+      cost: 2, cooldownMinutes: 2, durationGameYears: 10, description: '',
+    }));
+    expect(shouldShowExpander(powers)).toBe(false);
+  });
+  it('true when 5+ powers', () => {
+    const powers: DivinePower[] = Array.from({ length: 5 }, (_, i) => ({
+      id: `p${i}`, name: `Power ${i}`, type: 'blessing' as const,
+      cost: 2, cooldownMinutes: 2, durationGameYears: 10, description: '',
+    }));
+    expect(shouldShowExpander(powers)).toBe(true);
+  });
+});
+
+// =============================================================================
+// UI-068 to UI-073 — Task 3.12 Voice Map Icons + Character Profiles
+// =============================================================================
+
+describe('UI-068 VOICE_TYPE_COLORS has all 5 voice types', () => {
+  it('all types have a color', () => {
+    expect(VOICE_TYPE_COLORS.prophet).toBeTruthy();
+    expect(VOICE_TYPE_COLORS.ruler).toBeTruthy();
+    expect(VOICE_TYPE_COLORS.general).toBeTruthy();
+    expect(VOICE_TYPE_COLORS.scholar).toBeTruthy();
+    expect(VOICE_TYPE_COLORS.heretic).toBeTruthy();
+  });
+});
+
+describe('UI-069 buildVoiceIcon', () => {
+  it('correctly maps type to ring color', () => {
+    const voice = makeVoice('v1', 'prophet');
+    const icon = buildVoiceIcon(voice);
+    expect(icon.ringColor).toBe(VOICE_TYPE_COLORS.prophet);
+    expect(icon.voiceId).toBe('v1');
+    expect(icon.hasPetition).toBe(false);
+  });
+  it('marks hasPetition when petition active', () => {
+    const petition = makePetition('v1');
+    const voice = makeVoice('v1', 'general', 'region_1', 0.7, petition);
+    const icon = buildVoiceIcon(voice);
+    expect(icon.hasPetition).toBe(true);
+    expect(icon.ariaLabel).toContain('Has petition');
+  });
+});
+
+describe('UI-070 buildVoiceProfile', () => {
+  it('builds correct active years', () => {
+    const voice = makeVoice('v1', 'ruler');
+    const profile = buildVoiceProfile(voice, 1700, [voice]);
+    expect(profile.activeYears).toBe(100); // 1700 - 1600
+    expect(profile.typeLabel).toBe('Ruler');
+    expect(profile.isLowLoyalty).toBe(false); // loyalty 0.7 > threshold 0.3
+  });
+  it('marks isLowLoyalty below betrayal threshold', () => {
+    const voice = makeVoice('v1', 'prophet', 'region_1', 0.2);
+    const profile = buildVoiceProfile(voice, 1700, [voice]);
+    expect(profile.isLowLoyalty).toBe(true);
+  });
+});
+
+describe('UI-071 getLoyaltyColor', () => {
+  it('green for high loyalty', () => {
+    expect(getLoyaltyColor(0.8)).toContain('#5c');
+  });
+  it('yellow for medium loyalty', () => {
+    expect(getLoyaltyColor(0.5)).toContain('#f0');
+  });
+  it('red for low loyalty', () => {
+    expect(getLoyaltyColor(0.2)).toContain('#d9');
+  });
+});
+
+describe('UI-072 getPrimaryPetitioningVoice', () => {
+  it('returns null when no petitions', () => {
+    const state: GameState = {
+      ...makeMinimalGameState(),
+      voiceRecords: [makeVoice('v1', 'prophet')],
+    };
+    expect(getPrimaryPetitioningVoice(state)).toBeNull();
+  });
+  it('prefers heretic petition', () => {
+    const p = makePetition('v_heretic');
+    const state: GameState = {
+      ...makeMinimalGameState(),
+      voiceRecords: [
+        makeVoice('v1', 'prophet', 'r1', 0.7, makePetition('v1')),
+        makeVoice('v_heretic', 'heretic', 'r2', 0.2, p),
+      ],
+    };
+    const primary = getPrimaryPetitioningVoice(state);
+    expect(primary?.type).toBe('heretic');
+  });
+});
+
+describe('UI-073 voice notification texts', () => {
+  it('emergence toast mentions name', () => {
+    const voice = makeVoice('v1', 'prophet');
+    const text = buildVoiceEmergenceToastText(voice);
+    expect(text).toContain('Voice v1');
+    expect(text).toContain('Prophet');
+  });
+  it('death toast distinguishes war vs natural', () => {
+    const voice = makeVoice('v1', 'general');
+    expect(buildVoiceDeathToastText(voice, true)).toContain('fell in battle');
+    expect(buildVoiceDeathToastText(voice, false)).toContain('passed');
+  });
+  it('betrayal toast mentions turning against', () => {
+    const voice = makeVoice('v1', 'prophet');
+    const text = buildVoiceBetrayalToastText(voice);
+    expect(text).toContain('turned against');
+  });
+});
+
+// =============================================================================
+// UI-074 to UI-079 — Task 3.13 Combo Divine Chain Toast
+// =============================================================================
+
+describe('UI-074 COMBO_DISCOVERY_TEXT has all 9 combos', () => {
+  it('all 9 combos have discovery text', () => {
+    const ids = Object.keys(COMBO_DISCOVERY_TEXT);
+    expect(ids).toHaveLength(9);
+    expect(COMBO_DISCOVERY_TEXT.quake_scatter).toBeTruthy();
+    expect(COMBO_DISCOVERY_TEXT.divine_purge).toBeTruthy();
+  });
+});
+
+describe('UI-075 COMBO_NAMES has all 9 combos', () => {
+  it('all 9 combos have a display name', () => {
+    const names = Object.values(COMBO_NAMES);
+    expect(names).toHaveLength(9);
+    expect(names.every(n => n.startsWith('Divine Chain'))).toBe(true);
+  });
+});
+
+describe('UI-076 buildComboToastData', () => {
+  it('returns correct toast style and auto-dismiss', () => {
+    const data = buildComboToastData('quake_scatter', true);
+    expect(data.toast.style).toBe('combo');
+    expect(data.toast.autoDismissMs).toBe(5000);
+    expect(data.isFirstDiscovery).toBe(true);
+    expect(data.comboName).toContain('Quake Scatter');
+  });
+  it('includes discovery text in subtitle', () => {
+    const data = buildComboToastData('divine_purge', false);
+    expect(data.toast.subtitle).toContain('corruption');
+  });
+});
+
+describe('UI-077 FIRST_COMBO_TOOLTIP_TEXT is defined', () => {
+  it('tooltip text is a non-empty string', () => {
+    expect(typeof FIRST_COMBO_TOOLTIP_TEXT).toBe('string');
+    expect(FIRST_COMBO_TOOLTIP_TEXT.length).toBeGreaterThan(10);
+  });
+});
+
+describe('UI-078 getWhisperFeedbackText — untargeted', () => {
+  it('returns success text for war whisper', () => {
+    const text = getWhisperFeedbackText('war', false, 'success');
+    expect(text).toContain('Aggression stirs');
+  });
+  it('returns resisted text for faith whisper', () => {
+    const text = getWhisperFeedbackText('faith', false, 'resisted');
+    expect(text).toContain("Faith doesn't come");
+  });
+});
+
+describe('UI-079 getWhisperFeedbackText — targeted war/peace', () => {
+  it('inserts target nation name', () => {
+    const text = getWhisperFeedbackText('war', true, 'success', 'Valdorn');
+    expect(text).toContain('Valdorn');
+  });
+  it('targeted peace success mentions olive branch', () => {
+    const text = getWhisperFeedbackText('peace', true, 'success', 'Kavari');
+    expect(text).toContain('olive branch');
+    expect(text).toContain('Kavari');
+  });
+});
+
+// =============================================================================
+// UI-080 to UI-086 — Task 3.14 Petition UI in Bottom Sheet
+// =============================================================================
+
+describe('UI-080 buildPetitionUI — basic petition', () => {
+  it('builds correct petition data for prophet', () => {
+    const petition = makePetition('v1', 'bless_region', 10000);
+    const voice = makeVoice('v1', 'prophet', 'region_1', 0.7, petition);
+    const data = buildPetitionUI(voice, petition, 5000);
+    expect(data.voiceId).toBe('v1');
+    expect(data.voiceType).toBe('prophet');
+    expect(data.remainingSec).toBe(5000);
+    expect(data.isExpired).toBe(false);
+    expect(data.isHeretic).toBe(false);
+    expect(data.fulfillAction).not.toBeNull();
+    expect(data.fulfillAction?.powerId).toBe('bountiful_harvest');
+  });
+});
+
+describe('UI-081 buildPetitionUI — expired petition', () => {
+  it('isExpired true when nowSec >= expiryTime', () => {
+    const petition = makePetition('v1', 'bless_region', 5000);
+    const voice = makeVoice('v1', 'prophet', 'region_1', 0.7, petition);
+    const data = buildPetitionUI(voice, petition, 6000);
+    expect(data.isExpired).toBe(true);
+    expect(data.remainingSec).toBe(0);
+  });
+});
+
+describe('UI-082 buildPetitionUI — heretic petition', () => {
+  it('heretic petition has no fulfillAction but has heretikOptions', () => {
+    const petition = makePetition('v_heretic', 'reform_commandment', 9999);
+    const voice = makeVoice('v_heretic', 'heretic', 'region_1', 0.2, petition);
+    const data = buildPetitionUI(voice, petition, 0);
+    expect(data.isHeretic).toBe(true);
+    expect(data.fulfillAction).toBeNull();
+    expect(data.heretikOptions).toBeDefined();
+    expect(data.heretikOptions!.suppressText).toBe('Suppress');
+    expect(data.heretikOptions!.tolerateText).toBe('Tolerate');
+  });
+});
+
+describe('UI-083 buildPetitionCounterState', () => {
+  it('hidden when no petitions', () => {
+    const state: GameState = {
+      ...makeMinimalGameState(),
+      voiceRecords: [makeVoice('v1', 'prophet')],
+    };
+    const counter = buildPetitionCounterState(state);
+    expect(counter.isVisible).toBe(false);
+    expect(counter.count).toBe(0);
+  });
+  it('visible with count when petitions pending', () => {
+    const state: GameState = {
+      ...makeMinimalGameState(),
+      voiceRecords: [
+        makeVoice('v1', 'prophet', 'r1', 0.7, makePetition('v1')),
+        makeVoice('v2', 'ruler', 'r2', 0.7, makePetition('v2')),
+      ],
+    };
+    const counter = buildPetitionCounterState(state);
+    expect(counter.isVisible).toBe(true);
+    expect(counter.count).toBe(2);
+    expect(counter.hasHeretic).toBe(false);
+  });
+  it('hasHeretic true when heretic has petition', () => {
+    const state: GameState = {
+      ...makeMinimalGameState(),
+      voiceRecords: [
+        makeVoice('v1', 'heretic', 'r1', 0.2, makePetition('v1')),
+      ],
+    };
+    const counter = buildPetitionCounterState(state);
+    expect(counter.hasHeretic).toBe(true);
+  });
+});
+
+describe('UI-084 isPetitionExpired', () => {
+  it('false before expiry', () => {
+    const p = makePetition('v1', 'bless_region', 100);
+    expect(isPetitionExpired(p, 50)).toBe(false);
+  });
+  it('true at or after expiry', () => {
+    const p = makePetition('v1', 'bless_region', 100);
+    expect(isPetitionExpired(p, 100)).toBe(true);
+    expect(isPetitionExpired(p, 200)).toBe(true);
+  });
+});
+
+describe('UI-085 getAutoDenyLoyaltyLoss', () => {
+  it('matches VOICES.LOYALTY_LOSS_AUTO_DENY constant', () => {
+    expect(getAutoDenyLoyaltyLoss()).toBe(VOICES.LOYALTY_LOSS_AUTO_DENY);
+  });
+});
+
+describe('UI-086 buildPetitionUI — general petition maps to correct power', () => {
+  it('aid_in_battle maps to great_storm', () => {
+    const petition = makePetition('v1', 'aid_in_battle', 9999);
+    const voice = makeVoice('v1', 'general', 'region_1', 0.7, petition);
+    const data = buildPetitionUI(voice, petition, 0);
+    expect(data.fulfillAction?.powerId).toBe('great_storm');
+  });
+});
+
+// =============================================================================
+// UI-087 to UI-095 — Task 3.15 Harbinger Overlay + Indicators
+// =============================================================================
+
+describe('UI-087 buildAnomalyOverlayData — empty state', () => {
+  it('returns empty array when no corrupted/veiled regions', () => {
+    const state = makeMinimalGameState();
+    const data = buildAnomalyOverlayData(state);
+    expect(data).toHaveLength(0);
+  });
+});
+
+describe('UI-088 buildAnomalyOverlayData — corrupted region', () => {
+  it('includes corrupted region with moderate intensity', () => {
+    const state: GameState = {
+      ...makeMinimalGameState(),
+      world: {
+        ...makeMinimalGameState().world,
+        alienState: {
+          ...makeMinimalGameState().world.alienState,
+          harbinger: {
+            ...makeMinimalGameState().world.alienState.harbinger,
+            corruptedRegionIds: ['region_corrupted'],
+          },
+        },
+      },
+    };
+    const data = buildAnomalyOverlayData(state);
+    expect(data).toHaveLength(1);
+    expect(data[0].regionId).toBe('region_corrupted');
+    expect(data[0].isCorrupted).toBe(true);
+    expect(data[0].intensity).toBe('moderate');
+    expect(data[0].showDataUnreliable).toBe(false);
+  });
+});
+
+describe('UI-089 buildAnomalyOverlayData — veiled region', () => {
+  it('showDataUnreliable is true for veiled regions', () => {
+    const state: GameState = {
+      ...makeMinimalGameState(),
+      world: {
+        ...makeMinimalGameState().world,
+        alienState: {
+          ...makeMinimalGameState().world.alienState,
+          harbinger: {
+            ...makeMinimalGameState().world.alienState.harbinger,
+            veiledRegionIds: ['region_veiled'],
+          },
+        },
+      },
+    };
+    const data = buildAnomalyOverlayData(state);
+    expect(data).toHaveLength(1);
+    expect(data[0].isVeiled).toBe(true);
+    expect(data[0].showDataUnreliable).toBe(true);
+  });
+});
+
+describe('UI-090 buildAnomalyOverlayData — corrupted + veiled = heavy', () => {
+  it('intensity is heavy when both corrupted and veiled', () => {
+    const state: GameState = {
+      ...makeMinimalGameState(),
+      world: {
+        ...makeMinimalGameState().world,
+        alienState: {
+          ...makeMinimalGameState().world.alienState,
+          harbinger: {
+            ...makeMinimalGameState().world.alienState.harbinger,
+            corruptedRegionIds: ['region_x'],
+            veiledRegionIds: ['region_x'],
+          },
+        },
+      },
+    };
+    const data = buildAnomalyOverlayData(state);
+    const r = data.find(d => d.regionId === 'region_x');
+    expect(r?.intensity).toBe('heavy');
+    expect(r?.isCorrupted).toBe(true);
+    expect(r?.isVeiled).toBe(true);
+  });
+});
+
+describe('UI-091 isAnomalyLayerUnlocked', () => {
+  it('false in early eras (e.g. revelation = era 10, index 9)', () => {
+    const state: GameState = {
+      ...makeMinimalGameState(),
+      world: { ...makeMinimalGameState().world, currentEra: 'revelation' },
+    };
+    // revelation is index 9, VISIBILITY_OVERLAY_ERA = 10, so threshold = 10-1 = 9
+    // eraIndex('revelation') = 9 >= 9 → true
+    expect(isAnomalyLayerUnlocked(state)).toBe(true);
+  });
+  it('false in digital era (index 7)', () => {
+    const state: GameState = {
+      ...makeMinimalGameState(),
+      world: { ...makeMinimalGameState().world, currentEra: 'digital' },
+    };
+    expect(isAnomalyLayerUnlocked(state)).toBe(false);
+  });
+});
+
+describe('UI-092 buildHarbingerVFXData — empty before Era 10', () => {
+  it('returns empty array before overlay era', () => {
+    const state: GameState = {
+      ...makeMinimalGameState(),
+      world: { ...makeMinimalGameState().world, currentEra: 'industry' },
+    };
+    const vfx = buildHarbingerVFXData(state);
+    expect(vfx).toHaveLength(0);
+  });
+});
+
+describe('UI-093 buildHarbingerVFXData — VFX in Era 10+', () => {
+  it('generates corruption_shimmer for corrupted regions', () => {
+    const state: GameState = {
+      ...makeMinimalGameState(),
+      world: {
+        ...makeMinimalGameState().world,
+        currentEra: 'revelation',
+        alienState: {
+          ...makeMinimalGameState().world.alienState,
+          harbinger: {
+            ...makeMinimalGameState().world.alienState.harbinger,
+            corruptedRegionIds: ['r_corrupt'],
+          },
+        },
+      },
+    };
+    const vfx = buildHarbingerVFXData(state);
+    const shimmer = vfx.find(v => v.type === 'corruption_shimmer');
+    expect(shimmer).toBeDefined();
+    expect(shimmer!.regionId).toBe('r_corrupt');
+    expect(shimmer!.isVisible).toBe(true);
+  });
+  it('generates veil_shimmer for veiled regions', () => {
+    const state: GameState = {
+      ...makeMinimalGameState(),
+      world: {
+        ...makeMinimalGameState().world,
+        currentEra: 'revelation',
+        alienState: {
+          ...makeMinimalGameState().world.alienState,
+          harbinger: {
+            ...makeMinimalGameState().world.alienState.harbinger,
+            veiledRegionIds: ['r_veiled'],
+          },
+        },
+      },
+    };
+    const vfx = buildHarbingerVFXData(state);
+    const veil = vfx.find(v => v.type === 'veil_shimmer');
+    expect(veil).toBeDefined();
+    expect(veil!.regionId).toBe('r_veiled');
+  });
+});
+
+describe('UI-094 HARBINGER_VFX_COLORS has all VFX types', () => {
+  it('all 5 VFX types have colors', () => {
+    expect(HARBINGER_VFX_COLORS.corruption_shimmer).toBeTruthy();
+    expect(HARBINGER_VFX_COLORS.veil_shimmer).toBeTruthy();
+    expect(HARBINGER_VFX_COLORS.sabotage_trail).toBeTruthy();
+    expect(HARBINGER_VFX_COLORS.purge_effect).toBeTruthy();
+    expect(HARBINGER_VFX_COLORS.discord_whisper).toBeTruthy();
+  });
+});
+
+// =============================================================================
+// UI-095 to UI-100 — Integration / Cross-Module
+// =============================================================================
+
+describe('UI-095 DualArcFABMenu.computeLayout with combo hints', () => {
+  it('returns ArcLayout with blessing and disaster arrays', () => {
+    const fab = new DualArcFABMenu({ powers: [], onPowerSelect: () => {} });
+    fab.setDualArcLayout(true);
+    const state = makeMinimalGameState();
+    const harvest: DivinePower = {
+      id: 'bountiful_harvest', name: 'Bountiful Harvest', type: 'blessing',
+      cost: 2, cooldownMinutes: 2, durationGameYears: 10, description: '',
+    };
+    const layout = fab.computeLayout(
+      [{ power: harvest, reason: 'cheapest_blessing' }],
+      state, false, false,
+    );
+    expect(layout.blessingButtons).toHaveLength(1);
+    expect(layout.disasterButtons).toHaveLength(0);
+    expect(layout.eyePosition).toEqual({ x: 0, y: -130 });
+  });
+});
+
+describe('UI-096 buildVoiceProfile lineage description', () => {
+  it('includes lineage description when predecessor exists', () => {
+    const ancestor = makeVoice('v_ancestor', 'prophet', 'r1');
+    ancestor.id = 'v_ancestor';
+    const descendant = makeVoice('v_descendant', 'prophet', 'r1');
+    descendant.lineageOf = 'v_ancestor';
+    const profile = buildVoiceProfile(descendant, 1700, [ancestor, descendant]);
+    expect(profile.lineageDescription).toContain('Lineage of');
+    expect(profile.lineageDescription).toContain('Voice v_ancestor');
+  });
+  it('null lineage when no predecessor', () => {
+    const voice = makeVoice('v1', 'prophet');
+    const profile = buildVoiceProfile(voice, 1700, [voice]);
+    expect(profile.lineageDescription).toBeNull();
+  });
+});
+
+describe('UI-097 buildPetitionUI — shield_of_faith for protect petitions', () => {
+  it('protect_region maps to shield_of_faith', () => {
+    const petition = makePetition('v1', 'protect_region', 9999);
+    const voice = makeVoice('v1', 'prophet', 'r1', 0.7, petition);
+    const data = buildPetitionUI(voice, petition, 0);
+    expect(data.fulfillAction?.powerId).toBe('shield_of_faith');
+  });
+});
+
+describe('UI-098 combo toast for all 9 combos', () => {
+  it('all 9 combos build valid toasts', () => {
+    const ids = Object.keys(COMBO_NAMES) as Array<keyof typeof COMBO_NAMES>;
+    for (const id of ids) {
+      const data = buildComboToastData(id, false);
+      expect(data.toast.id).toBeTruthy();
+      expect(data.toast.style).toBe('combo');
+      expect(data.discoveryText).toBeTruthy();
+    }
+  });
+});
+
+describe('UI-099 getComboEligiblePowerIds — corrupted region enables divine_purge powers', () => {
+  it('shield_of_faith and miracle eligible when corruption present', () => {
+    const state: GameState = {
+      ...makeMinimalGameState(),
+      world: {
+        ...makeMinimalGameState().world,
+        alienState: {
+          ...makeMinimalGameState().world.alienState,
+          harbinger: {
+            ...makeMinimalGameState().world.alienState.harbinger,
+            corruptedRegionIds: ['r_corrupt'],
+          },
+        },
+      },
+    };
+    const eligible = getComboEligiblePowerIds(state);
+    expect(eligible.has('shield_of_faith')).toBe(true);
+    expect(eligible.has('miracle')).toBe(true);
+  });
+});
+
+describe('UI-100 buildPetitionCounterState ARIA label', () => {
+  it('singular "prayer" for count=1', () => {
+    const state: GameState = {
+      ...makeMinimalGameState(),
+      voiceRecords: [makeVoice('v1', 'prophet', 'r1', 0.7, makePetition('v1'))],
+    };
+    const counter = buildPetitionCounterState(state);
+    expect(counter.ariaLabel).toContain('1 prayer');
+    expect(counter.ariaLabel).not.toContain('1 prayers');
+  });
+  it('plural "prayers" for count=2', () => {
+    const state: GameState = {
+      ...makeMinimalGameState(),
+      voiceRecords: [
+        makeVoice('v1', 'prophet', 'r1', 0.7, makePetition('v1')),
+        makeVoice('v2', 'ruler', 'r2', 0.7, makePetition('v2')),
+      ],
+    };
+    const counter = buildPetitionCounterState(state);
+    expect(counter.ariaLabel).toContain('2 prayers');
   });
 });

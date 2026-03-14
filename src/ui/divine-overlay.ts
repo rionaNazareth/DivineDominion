@@ -141,3 +141,129 @@ export function shouldShowAlienSignal(state: GameState): boolean {
 export function hasDiseaseVectors(state: GameState): boolean {
   return state.world.diseases.some(d => d.isActive);
 }
+
+// ---------------------------------------------------------------------------
+// Harbinger Anomaly overlay layer (Task 3.15, Era 10+)
+// ---------------------------------------------------------------------------
+
+export type AnomalyIntensity = 'subtle' | 'moderate' | 'heavy';
+
+export interface AnomalyRegionData {
+  regionId: string;
+  isCorrupted: boolean;
+  isVeiled: boolean;
+  isImmune: boolean;
+  intensity: AnomalyIntensity;
+  /** Shows "⚠ Data unreliable" indicator when veiled */
+  showDataUnreliable: boolean;
+}
+
+/**
+ * Builds anomaly overlay data for all regions affected by the Harbinger.
+ * Derives region list from harbinger tracking data (not from regions Map).
+ * Only relevant when Era 10+ (shouldShowHarbingerOverlay returns true).
+ */
+export function buildAnomalyOverlayData(state: GameState): AnomalyRegionData[] {
+  const harbinger = state.world.alienState.harbinger;
+
+  // Collect all region IDs that have any Harbinger state
+  const allIds = new Set<string>([
+    ...harbinger.corruptedRegionIds,
+    ...harbinger.veiledRegionIds,
+    ...harbinger.immuneRegionIds,
+  ]);
+
+  if (allIds.size === 0) return [];
+
+  const corrupted = new Set(harbinger.corruptedRegionIds);
+  const veiled = new Set(harbinger.veiledRegionIds);
+  const immune = new Set(harbinger.immuneRegionIds);
+
+  return Array.from(allIds).map(regionId => {
+    const isCorrupted = corrupted.has(regionId);
+    const isVeiled = veiled.has(regionId);
+    const isImmune = immune.has(regionId);
+
+    let intensity: AnomalyIntensity = 'subtle';
+    if (isCorrupted && isVeiled) intensity = 'heavy';
+    else if (isCorrupted) intensity = 'moderate';
+
+    return {
+      regionId,
+      isCorrupted,
+      isVeiled,
+      isImmune,
+      intensity,
+      showDataUnreliable: isVeiled,
+    };
+  });
+}
+
+/** Returns whether the anomaly overlay layer is currently unlocked. */
+export function isAnomalyLayerUnlocked(state: GameState): boolean {
+  return eraIndex(state.world.currentEra) >= HARBINGER.VISIBILITY_OVERLAY_ERA - 1;
+}
+
+// ---------------------------------------------------------------------------
+// Harbinger VFX data (late game — Eras 11-12)
+// ---------------------------------------------------------------------------
+
+export type HarbingerVFXType =
+  | 'corruption_shimmer'  // dark-purple shimmer on corrupted regions
+  | 'veil_shimmer'        // translucent shimmer indicating veiled state
+  | 'sabotage_trail'      // purple trail showing recent sabotage path
+  | 'purge_effect'        // bright flash when Divine Purge removes corruption
+  | 'discord_whisper';    // subtle purple whisper effect
+
+export interface HarbingerVFXData {
+  type: HarbingerVFXType;
+  regionId: string;
+  color: string;
+  opacity: number;
+  isVisible: boolean;
+}
+
+export const HARBINGER_VFX_COLORS: Record<HarbingerVFXType, string> = {
+  corruption_shimmer: '#4a1a6a', // dark purple
+  veil_shimmer:       '#7a4a9a', // medium purple, translucent
+  sabotage_trail:     '#9060c0', // purple trail
+  purge_effect:       '#ffffff', // white flash → fades
+  discord_whisper:    '#6030a0', // subtle purple whisper
+};
+
+/**
+ * Builds VFX data for visible harbinger effects.
+ * Full visibility starts Era 11 (eraIndex >= 10).
+ */
+export function buildHarbingerVFXData(state: GameState): HarbingerVFXData[] {
+  const harbinger = state.world.alienState.harbinger;
+  const eraIdx = eraIndex(state.world.currentEra);
+  const fullVisibility = eraIdx >= 10; // Era 11+ (0-indexed: era 11 = index 10)
+  const overlayEra = eraIdx >= HARBINGER.VISIBILITY_OVERLAY_ERA - 1;
+
+  if (!overlayEra) return [];
+
+  const vfxList: HarbingerVFXData[] = [];
+
+  for (const regionId of harbinger.corruptedRegionIds) {
+    vfxList.push({
+      type: 'corruption_shimmer',
+      regionId,
+      color: HARBINGER_VFX_COLORS.corruption_shimmer,
+      opacity: fullVisibility ? 0.6 : 0.3,
+      isVisible: true,
+    });
+  }
+
+  for (const regionId of harbinger.veiledRegionIds) {
+    vfxList.push({
+      type: 'veil_shimmer',
+      regionId,
+      color: HARBINGER_VFX_COLORS.veil_shimmer,
+      opacity: 0.4,
+      isVisible: true,
+    });
+  }
+
+  return vfxList;
+}
