@@ -573,6 +573,8 @@ export interface GameState {
   comboWindowState: ComboWindowState;
   playerReligionId: ReligionId;
   selectedCommandments: CommandmentId[];
+  /** Cached aggregate of selected commandments' effects (computed by applyCommandmentEffects). */
+  effectiveCommandmentEffects?: CommandmentEffects;
   eventHistory: GameEvent[];
   currentEvent?: GameEvent;
   eraNarratives: Map<EraId, string>;

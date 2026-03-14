@@ -70,9 +70,9 @@ Re-read your own code. Verify:
 - [ ] Cross-dependency notes from the phase doc are honored
 - [ ] `npm test` passes
 
-### Step 5 — Sign Off
+### Step 5 — Sign Off (Non-Blocking)
 
-Output to chat:
+When (and only when) you have finished all tasks for Session N’s phase doc (or explicitly reached a deliberate stopping point agreed with the human), output this summary to chat:
 
 ```
 ## Sign-Off — Session N
@@ -86,7 +86,10 @@ Output to chat:
 - [anything needing judgment, or "none"]
 ```
 
-**Stop here.** Wait for user confirmation before continuing.
+This sign-off is for **logging and visibility**, not an automatic hard stop. After writing it:
+
+- If there are still tasks remaining in the phase doc and the human has not asked you to pause, **continue to Step 6 and keep implementing**.
+- If you are proposing a deviation from the design/spec, or need a human call, clearly list it under “Human Decisions Needed” and then wait.
 
 ### Step 6 — Write Handoff
 
