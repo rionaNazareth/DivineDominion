@@ -205,6 +205,7 @@ export const BATTLE = {
   COMMANDER_DEFEND_MODS: {
     aggressive: 0.90, cautious: 1.15, brilliant: 1.10, reckless: 0.80,
   },
+  CONQUEST_RELIGION_BONUS: 0.2,
 } as const;
 
 // -----------------------------------------------------------------------------

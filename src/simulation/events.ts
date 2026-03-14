@@ -1,7 +1,7 @@
 import './immer-config.js';
 import { produce } from 'immer';
 import type { GameState, GameEvent, EventId } from '../types/game.js';
-import { SPEED, TIME } from '../config/constants.js';
+import { AUTO_SAVE, SPEED, TIME } from '../config/constants.js';
 import { seededRandom } from './prng.js';
 
 export interface EventTemplate {
@@ -186,8 +186,8 @@ export function rollEvents(
   });
 }
 
-const EVENT_HISTORY_MAX = 50;
-const AUTO_SAVE_EVT_MAX = 50;
+const EVENT_HISTORY_MAX = AUTO_SAVE.EVENT_HISTORY_MAX;
+const AUTO_SAVE_EVT_MAX = AUTO_SAVE.EVENT_HISTORY_MAX;
 
 /**
  * Resolves the current event with a given choice index.

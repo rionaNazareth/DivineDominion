@@ -10,7 +10,7 @@ import { tickReligionSpread } from './religion.js';
 import { tickArmies } from './army.js';
 import { tickScience } from './science.js';
 import { tickNationAI } from './nation-ai.js';
-import { tickHarbinger } from './harbinger.js';
+import { tickHarbinger, tickCorruption, refreshHarbingerBudget } from './harbinger.js';
 import { tickVoices } from './voices.js';
 import { rollEvents } from './events.js';
 import { tickWhispers } from './whispers.js';
@@ -104,13 +104,23 @@ export function runSimulationTick(
   s = tickNationAI(s);
 
   // --- PHASE 5: CHARACTERS & EVENTS ---
+  // Refresh Harbinger budget on era transitions
+  const prevEra = state.world.currentEra;
+  const newEra = s.world.currentEra;
+  if (prevEra !== newEra) {
+    s = refreshHarbingerBudget(s);
+  }
+
   // Step 14: Harbinger tick (Era 7+)
   s = tickHarbinger(s);
+
+  // Step 14b: Corruption tick — ongoing dev loss for corrupted regions
+  s = tickCorruption(s);
 
   // Step 15: Follower Voice tick
   s = tickVoices(s, deltaGameYears);
 
-  // Step 16: Event generation
+  // Step 16: Event generation (no-op until Phase 5 provides event templates)
   s = rollEvents(s, deltaGameYears);
 
   // --- PHASE 6: HOUSEKEEPING ---

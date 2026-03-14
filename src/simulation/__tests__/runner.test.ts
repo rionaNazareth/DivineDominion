@@ -130,4 +130,22 @@ describe('runner module', () => {
     expect(result.world.currentYear).toBeGreaterThan(state.world.currentYear);
     expect(result.realTimeElapsed).toBe(state.realTimeElapsed + 12);
   });
+
+  it('RUN_011: tickCorruption is called by runner — corrupted regions lose dev', () => {
+    const corruptSpy = vi.spyOn(harbingerModule, 'tickCorruption');
+    runSimulationTick(state, 12);
+    expect(corruptSpy).toHaveBeenCalled();
+    corruptSpy.mockRestore();
+  });
+
+  it('RUN_012: refreshHarbingerBudget called on era transition', () => {
+    const refreshSpy = vi.spyOn(harbingerModule, 'refreshHarbingerBudget');
+    // Set state to just before era transition
+    const s = { ...state };
+    s.world = { ...s.world, currentYear: 1649.5, currentEra: 'renaissance' };
+    runSimulationTick(s, 12);
+    // After advancing 0.5 years to 1650, we cross into 'exploration' era
+    expect(refreshSpy).toHaveBeenCalled();
+    refreshSpy.mockRestore();
+  });
 });

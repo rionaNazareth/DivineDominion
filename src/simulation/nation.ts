@@ -12,6 +12,7 @@ import {
   TIME,
   TRADE,
 } from '../config/constants.js';
+import { computeGlobalScienceMod } from './science.js';
 import {
   CommandmentEffects,
   GameState,
@@ -161,6 +162,8 @@ function tickRegionPopulation(
   deltaYears: number,
   cmdEffects: CommandmentEffects | null,
 ): void {
+  if (deltaYears <= 0) return;
+
   if (region.terrain === 'ocean') {
     region.population = 0;
     return;
@@ -200,7 +203,7 @@ function tickRegionPopulation(
     * logisticFactor;
   growthRate = clamp(growthRate, -0.02, 0.02);
 
-  const delta = Math.floor(current * growthRate * deltaYears);
+  const delta = Math.floor(current * growthRate);
   let next = current + delta;
 
   if (next < 0) next = 0;
@@ -224,6 +227,7 @@ function tickRegionDevelopment(
   world: WorldState,
   deltaYears: number,
   cmdEffects: CommandmentEffects | null,
+  globalSciMod: number = 1.0,
 ): void {
   if (region.terrain === 'ocean') {
     region.development = 0;
@@ -263,7 +267,8 @@ function tickRegionDevelopment(
   const devGrowth = DEVELOPMENT.GROWTH_BASE_PER_TICK
     * (1 + econFactor + tradeFactor)
     * warMod * govMod * eraMod * inspireMod * cmdMod
-    * (deltaYears / TIME.TICK_GAME_YEARS);
+    * (deltaYears / TIME.TICK_GAME_YEARS)
+    * globalSciMod;
 
   region.development = clamp(
     region.development + devGrowth + tradeTechTransfer,
@@ -377,12 +382,13 @@ export function tickNations(
       nation.development = totalPop > 0 ? weightedDev / totalPop : 0;
     }
 
-    // Step 9: Development — uses fresh economy
+    // Step 9: Development — uses fresh economy, scaled by global science mod
+    const globalSciMod = computeGlobalScienceMod(draft as unknown as GameState);
     for (const nation of world.nations.values()) {
       for (const regionId of nation.regionIds) {
         const region = world.regions.get(regionId);
         if (!region) continue;
-        tickRegionDevelopment(region, nation, world, deltaYears, cmdEffects);
+        tickRegionDevelopment(region, nation, world, deltaYears, cmdEffects, globalSciMod);
       }
     }
 

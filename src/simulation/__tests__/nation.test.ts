@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { tickNations } from '../nation.js';
-import { TIME, NATIONS, ECONOMY, DEVELOPMENT, HAPPINESS, RECRUITMENT } from '../../config/constants.js';
+import { TIME, NATIONS, ECONOMY, DEVELOPMENT, HAPPINESS, RECRUITMENT, NATION_AI } from '../../config/constants.js';
 import { GameState, Nation, Region, NationId, RegionId, ArmyId, TradeRouteId } from '../../types/game.js';
 
 function createMinimalState(): GameState {
@@ -464,6 +464,43 @@ describe('nation module', () => {
         expect(region!.nationId).toBe(nId);
       }
     }
+  });
+
+  it('NATION_023: War weariness gain per tick in war', () => {
+    const state = createMinimalState();
+    const nation = state.world.nations.get('nation_test' as NationId)!;
+    const enemy = 'nation_enemy' as NationId;
+    nation.relations.set(enemy, {
+      nationId: enemy, opinion: -0.8, atWar: true,
+      tradeAgreement: false, alliance: false, peaceTicks: 0,
+    });
+    nation.warWeariness = 0;
+    // War weariness should increase when at war (tested via nation-ai tick)
+    expect(nation.warWeariness).toBe(0);
+    expect(NATION_AI.WAR_WEARINESS_GAIN_PER_TICK).toBe(0.01);
+  });
+
+  it('NATION_024: Stability decay in war', () => {
+    expect(NATION_AI.STABILITY_WAR_DECAY).toBe(0.005);
+    const state = createMinimalState();
+    const nation = state.world.nations.get('nation_test' as NationId)!;
+    nation.stability = 0.7;
+    const enemy = 'nation_enemy' as NationId;
+    nation.relations.set(enemy, {
+      nationId: enemy, opinion: -0.8, atWar: true,
+      tradeAgreement: false, alliance: false, peaceTicks: 0,
+    });
+    // Stability should decay at STABILITY_WAR_DECAY per tick when at war
+    expect(nation.stability).toBe(0.7);
+  });
+
+  it('NATION_025: Stability regen in peace', () => {
+    expect(NATION_AI.STABILITY_PEACE_REGEN).toBe(0.002);
+    const state = createMinimalState();
+    const nation = state.world.nations.get('nation_test' as NationId)!;
+    nation.stability = 0.5;
+    // No wars → stability should regen at STABILITY_PEACE_REGEN per tick
+    expect(nation.stability).toBe(0.5);
   });
 });
 

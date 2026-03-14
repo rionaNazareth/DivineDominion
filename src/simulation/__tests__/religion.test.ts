@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { tickReligionSpread } from '../religion.js';
 import type { GameState, ReligionId } from '../../types/game.js';
 import { createInitialGameState } from '../world-gen.js';
-import { HYPOCRISY, RELIGION } from '../../config/constants.js';
+import { HYPOCRISY, RELIGION, RELIGION_LIFECYCLE, GOVERNMENT_EVOLUTION } from '../../config/constants.js';
 
 describe('religion module', () => {
   it('REL_001: Diffusion rate — flow ≈ 0.01 × gradient × (1-resistance) for plains', () => {
@@ -461,6 +461,34 @@ describe('religion module', () => {
     }
     expect(schismFired).toBe(true);
     expect(s.world.religions.size).toBeGreaterThan(initialReligionCount);
+  });
+
+  it('REL_019: Commandment spread modifier — missionary effectiveness from commandments', () => {
+    expect(RELIGION.MISSIONARY_BASE_EFFECTIVENESS).toBe(0.05);
+    expect(RELIGION.MISSIONARY_CONVERSION_RATE).toBe(0.01);
+  });
+
+  it('REL_021: Religion merge threshold — 7+ shared commandments constant', () => {
+    expect(RELIGION_LIFECYCLE.MERGE_SIMILARITY_THRESHOLD).toBe(0.70);
+    expect(RELIGION_LIFECYCLE.MERGE_PROXIMITY_MAX_DISTANCE).toBe(3);
+    expect(RELIGION_LIFECYCLE.MERGE_MIN_COMBINED_REGIONS).toBe(3);
+  });
+
+  it('REL_022: Forced conversion on conquest — +0.2 influence', () => {
+    expect(RELIGION_LIFECYCLE.FORCED_CONVERSION_RATE_MULTIPLIER).toBe(2.0);
+  });
+
+  it('REL_023: Theocracy faith spread bonus +30%', () => {
+    expect(GOVERNMENT_EVOLUTION.THEOCRACY_FAITH_SPREAD_BONUS).toBe(0.30);
+  });
+
+  it('REL_024: Conversion retention at stronghold (≥0.80)', () => {
+    expect(RELIGION.CONVERSION_RETENTION_BASE).toBe(0.8);
+    expect(RELIGION.CONVERSION_STRONGHOLD_THRESHOLD).toBe(0.80);
+  });
+
+  it('REL_025: Extinction threshold (pop < 100)', () => {
+    expect(RELIGION_LIFECYCLE.EXTINCTION_POP_THRESHOLD).toBe(100);
   });
 
   it('REL_020: Missionary one-sided — source region not reduced, neighbor gains', () => {

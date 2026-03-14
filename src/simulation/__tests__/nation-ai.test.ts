@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { tickNationAI } from '../nation-ai.js';
-import { NATION_AI } from '../../config/constants.js';
+import { NATION_AI, GOVERNMENT_EVOLUTION } from '../../config/constants.js';
 import type { GameState, NationId } from '../../types/game.js';
 import { createInitialGameState } from '../world-gen.js';
 
@@ -85,5 +85,15 @@ describe('nation-ai module', () => {
       expect(nation.relations).toBeDefined();
       expect(nation.relations instanceof Map).toBe(true);
     }
+  });
+
+  it('NATION_018: Government evolution monarchy→republic constants', () => {
+    expect(GOVERNMENT_EVOLUTION.MONARCHY_TO_REPUBLIC_DEV).toBe(5);
+    expect(GOVERNMENT_EVOLUTION.MONARCHY_TO_REPUBLIC_ERA).toBe(4);
+  });
+
+  it('NATION_019: Government evolution monarchy→theocracy constants', () => {
+    expect(GOVERNMENT_EVOLUTION.MONARCHY_TO_THEOCRACY_FAITH).toBe(0.80);
+    expect(GOVERNMENT_EVOLUTION.MONARCHY_TO_THEOCRACY_REGION_RATIO).toBe(0.50);
   });
 });

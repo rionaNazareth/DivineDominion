@@ -301,7 +301,7 @@ function findRetreatTarget(
     : null;
 }
 
-const CONQUEST_RELIGION_BONUS = 0.2;
+const CONQUEST_RELIGION_BONUS = BATTLE.CONQUEST_RELIGION_BONUS;
 
 /** Apply conquest: transfer region to winner, update nation.regionIds, lostTerritory, and +0.2 winner religion influence. */
 function applyConquest(
@@ -367,6 +367,38 @@ function applyConquest(
   if (dominant != null) {
     region.dominantReligion = dominant;
   }
+
+  // Nation elimination: if loser has 0 regions, remove them
+  if (loserNation.regionIds.length === 0) {
+    eliminateNation(world, loserNation.id);
+  }
+}
+
+function eliminateNation(world: WorldState, nationId: NationId): void {
+  // Disband all armies belonging to this nation
+  const armyIds = Array.from(world.armies.keys());
+  for (const aid of armyIds) {
+    const army = world.armies.get(aid);
+    if (army && army.nationId === nationId) {
+      world.armies.delete(aid);
+    }
+  }
+
+  // Dissolve trade routes touching this nation's (now-lost) regions
+  for (const route of world.tradeRoutes.values()) {
+    const regA = world.regions.get(route.regionA);
+    const regB = world.regions.get(route.regionB);
+    if (regA?.nationId === nationId || regB?.nationId === nationId) {
+      route.isActive = false;
+    }
+  }
+
+  // Remove diplomatic relations referencing this nation
+  for (const nation of world.nations.values()) {
+    nation.relations.delete(nationId);
+  }
+
+  world.nations.delete(nationId);
 }
 
 /** Deliverable 7.3: compute ticks to capture and per-tick attrition for a siege. */

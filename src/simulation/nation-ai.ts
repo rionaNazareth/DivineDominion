@@ -10,7 +10,9 @@ import type {
   RegionId,
 } from '../types/game.js';
 
-const NUCLEAR_DETERRENCE_MOD = 0.5;
+import { NUCLEAR } from '../config/constants.js';
+
+const NUCLEAR_DETERRENCE_MOD = NUCLEAR.DETERRENCE_MOD;
 
 function getWorld(state: GameState): WorldState {
   return state.world;
@@ -116,8 +118,12 @@ export function tickNationAI(
           const lowStability = 1.0 - stability;
           const raw =
             warWeariness * 0.4 + isLosing * 0.3 + warDuration * 0.2 + lowStability * 0.1;
+          const whisperPeaceNudge = (nation.aiWeights?.peace ?? 0) > 0
+            ? nation.aiWeights.peace * 0.3
+            : 0;
           const peaceScore =
-            getPersonalityWeight(nation.aiPersonality, 'sue_peace') * raw;
+            getPersonalityWeight(nation.aiPersonality, 'sue_peace') * raw +
+            whisperPeaceNudge;
           if (
             peaceScore > NATION_AI.PEACE_THRESHOLD &&
             peaceScore > bestScore
@@ -161,13 +167,17 @@ export function tickNationAI(
             religionDiff * NATION_AI.WAR_SCORE_RELIGION_WEIGHT +
             opportunity * NATION_AI.WAR_SCORE_OPPORTUNITY_WEIGHT;
 
+          const whisperWarNudge = (nation.aiWeights?.war ?? 0) > 0
+            ? nation.aiWeights.war * 0.3
+            : 0;
           let warScore =
             getPersonalityWeight(nation.aiPersonality, 'declare_war') * rawScore -
-            warWeariness;
+            warWeariness +
+            whisperWarNudge;
 
           if (
-            nation.development >= 8 &&
-            targetNation.development >= 8
+            nation.development >= NUCLEAR.DEV_THRESHOLD &&
+            targetNation.development >= NUCLEAR.DEV_THRESHOLD
           ) {
             warScore *= NUCLEAR_DETERRENCE_MOD;
           }

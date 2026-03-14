@@ -322,15 +322,14 @@ export function tickHarbinger(state: GameState): GameState {
     let callIndex = tick * 2000;
     const rng = () => seededRandom(worldSeed, tick, callIndex++);
 
-    // Refresh budget at era start (when budget would have been 0 from previous era)
+    // Refresh budget at era start (fallback if runner missed the transition)
     const signalStrength = signalStrengthForEra(eraIndex);
     if (harbinger.budgetRemaining <= 0 && signalStrength > 0) {
-      // If budget was exhausted and we're in an active era, refresh for this era
-      // (Era transitions in the runner trigger this naturally)
+      harbinger.budgetRemaining = signalStrength;
     }
 
-    // Compute rubber-banded effective budget
-    const effectiveBudget = rubberBandBudget(draft as GameState, harbinger.budgetRemaining);
+    // Compute rubber-banded effective budget using the era's signal strength
+    const effectiveBudget = rubberBandBudget(draft as GameState, signalStrength);
 
     if (effectiveBudget <= 0) {
       harbinger.lastActionTick = tick;
