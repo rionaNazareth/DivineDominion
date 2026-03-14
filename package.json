@@ -12,8 +12,9 @@
     "prototype:seed": "tsx src/prototype/run.ts --seed=12345",
     "playtest:headless": "tsx src/playtest/headless-runner.ts",
     "playtest:analyze": "tsx src/playtest/analyzer.ts",
-    "playtest:visual": "playwright test",
-    "playtest:all": "tsx src/playtest/headless-runner.ts && playwright test"
+    "playtest:fix": "tsx src/playtest/fix-playbook.ts",
+    "playtest:visual": "playwright test src/playtest/__tests__/visual.spec.ts",
+    "playtest:all": "tsx src/playtest/headless-runner.ts && playwright test src/playtest/__tests__/visual.spec.ts"
   },
   "dependencies": {
     "@capacitor/core": "^6.0.0",
