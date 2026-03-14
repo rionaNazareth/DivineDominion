@@ -8,35 +8,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { WIN_RATE_TARGETS } from '../config/constants.js';
-
-// -----------------------------------------------------------------------------
-// Types
-// -----------------------------------------------------------------------------
-
-interface RunResult {
-  seed: number;
-  strategy: string;
-  archetype: string;
-  commandments: string[];
-  outcome: 'win' | 'loss';
-  endingType: string;
-  defenseGridYear: number | null;
-  finalYear: number;
-  totalTicks: number;
-  summary: {
-    finalPopulation: number;
-    finalScienceLevel: number;
-    warCount: number;
-    totalBattles: number;
-    religionsSurvivingYear2000: number;
-    eventsPerEra: number[];
-    maxGapBetweenPlayerActions: number;
-    peakHypocrisyLevel: number;
-    harbingerActionsReceived: number;
-    totalDivineInterventions: number;
-    commandmentSynergyScore: number;
-  };
-}
+import type { RunResult } from '../types/game.js';
+import { readRunResult } from './metrics-collector.js';
 
 interface CriterionResult {
   id: string;
@@ -279,11 +252,11 @@ async function main(): Promise<void> {
 
   const results: RunResult[] = [];
   for (const file of files) {
-    try {
-      const raw = fs.readFileSync(path.join(resultsDir, file), 'utf-8');
-      results.push(JSON.parse(raw) as RunResult);
-    } catch {
-      console.warn(`Skipping malformed file: ${file}`);
+    const result = readRunResult(path.join(resultsDir, file));
+    if (result) {
+      results.push(result);
+    } else {
+      console.warn(`Skipping malformed/invalid file: ${file}`);
     }
   }
 

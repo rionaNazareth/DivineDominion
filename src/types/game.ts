@@ -623,6 +623,8 @@ export interface FollowerVoice {
   lineageOf: VoiceId | null;
   currentPetition: Petition | null;
   betrayalImminentTicks?: number;
+  petitionsAnswered: number;
+  petitionsDenied: number;
 }
 
 export interface Petition {
@@ -695,4 +697,86 @@ export interface SimulationTick {
   diseasesUpdated: Disease[];
   regionsChanged: RegionId[];
   scienceMilestonesReached: ScienceMilestoneId[];
+}
+
+// -----------------------------------------------------------------------------
+// Player Actions (Agent Player)
+// -----------------------------------------------------------------------------
+
+export type PlayerAction =
+  | { type: 'cast_power'; powerId: PowerId; regionId: RegionId }
+  | { type: 'cast_whisper'; regionId: RegionId; whisperType: WhisperType }
+  | { type: 'event_choice'; eventId: EventId; choiceIndex: number }
+  | { type: 'fulfill_petition'; voiceId: VoiceId }
+  | { type: 'deny_petition'; voiceId: VoiceId }
+  | { type: 'wait' };
+
+// -----------------------------------------------------------------------------
+// Strategy Profiles (Playtest)
+// -----------------------------------------------------------------------------
+
+export interface StrategyProfile {
+  id: string;
+  eventBias: Record<string, number>;
+  powerPolicy: {
+    targetSelection: string;
+    rivalTargeting: string;
+    maxActivePowers: number;
+    preferDisasters: boolean;
+  };
+  whisperPolicy: { types: string[]; frequency: number };
+  petitionPolicy: { fulfill: string[]; deny: string[] };
+  castFrequency: string;
+}
+
+// -----------------------------------------------------------------------------
+// Playtest Metrics (§14c)
+// -----------------------------------------------------------------------------
+
+/** Per-tick snapshot. Sampled every 10 ticks by the metrics collector. */
+export interface TickMetrics {
+  tick: number;
+  gameYear: number;
+  era: EraId;
+  populations: Record<NationId, number>;
+  religionShares: Record<ReligionId, number>;
+  warCount: number;
+  activeTradeRoutes: number;
+  scienceLevel: number;
+  eventsFired: number;
+  playerActions: PlayerAction[];
+  divineEnergy: number;
+  hypocrisyLevel: number;
+  harbingerBudget: number;
+  voicesAlive: number;
+}
+
+/** Per-run aggregate summary. */
+export interface RunSummary {
+  finalPopulation: number;
+  finalScienceLevel: number;
+  warCount: number;
+  totalBattles: number;
+  religionsSurvivingYear2000: number;
+  eventsPerEra: number[];
+  maxGapBetweenPlayerActions: number;
+  peakHypocrisyLevel: number;
+  harbingerActionsReceived: number;
+  totalDivineInterventions: number;
+  commandmentSynergyScore: number;
+}
+
+/** Full result for one headless run. Written to playtest-results/ as JSON. */
+export interface RunResult {
+  seed: number;
+  strategy: string;
+  archetype: string;
+  commandments: CommandmentId[];
+  outcome: 'win' | 'loss';
+  endingType: EndingType;
+  defenseGridYear: number | null;
+  finalYear: number;
+  totalTicks: number;
+  metrics: TickMetrics[];
+  summary: RunSummary;
 }

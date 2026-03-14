@@ -10,37 +10,16 @@ import type {
   RegionId,
   PowerId,
   VoiceId,
+  WhisperType,
+  PlayerAction,
+  StrategyProfile,
 } from '../types/game.js';
-import type { WhisperType } from '../types/game.js';
 import { BLESSINGS, DISASTERS, DIVINE_ENERGY } from '../config/constants.js';
 import { isPowerUnlocked } from '../simulation/divine.js';
 import { createPRNG } from '../simulation/prng.js';
 
-// -----------------------------------------------------------------------------
-// Types
-// -----------------------------------------------------------------------------
-
-export type PlayerAction =
-  | { type: 'cast_power'; powerId: PowerId; regionId: RegionId }
-  | { type: 'cast_whisper'; regionId: RegionId; whisperType: WhisperType }
-  | { type: 'event_choice'; eventId: string; choiceIndex: number }
-  | { type: 'fulfill_petition'; voiceId: VoiceId }
-  | { type: 'deny_petition'; voiceId: VoiceId }
-  | { type: 'wait' };
-
-export interface StrategyProfile {
-  id: string;
-  eventBias: Record<string, number>;
-  powerPolicy: {
-    targetSelection: string;
-    rivalTargeting: string;
-    maxActivePowers: number;
-    preferDisasters: boolean;
-  };
-  whisperPolicy: { types: string[]; frequency: number };
-  petitionPolicy: { fulfill: string[]; deny: string[] };
-  castFrequency: string;
-}
+// Re-export so callers that import from this file don't need to change.
+export type { PlayerAction, StrategyProfile } from '../types/game.js';
 
 // -----------------------------------------------------------------------------
 // Helpers
