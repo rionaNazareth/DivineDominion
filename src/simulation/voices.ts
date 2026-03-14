@@ -300,7 +300,7 @@ export function tickVoices(state: GameState, deltaYears: number): GameState {
       voice.loyalty = Math.max(0, voice.loyalty - VOICES.LOYALTY_DECAY_PER_100_TICKS / 100);
 
       // Petition expiry (auto-deny)
-      if (voice.currentPetition !== null) {
+      if (voice.currentPetition != null) {
         const now = state.realTimeElapsed;
         if (now >= voice.currentPetition.expiryTime) {
           voice.loyalty = Math.max(0, voice.loyalty - VOICES.LOYALTY_LOSS_AUTO_DENY);

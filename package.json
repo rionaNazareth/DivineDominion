@@ -9,7 +9,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "prototype": "tsx src/prototype/run.ts",
-    "prototype:seed": "tsx src/prototype/run.ts --seed=12345"
+    "prototype:seed": "tsx src/prototype/run.ts --seed=12345",
+    "playtest:headless": "tsx src/playtest/headless-runner.ts",
+    "playtest:analyze": "tsx src/playtest/analyzer.ts",
+    "playtest:visual": "playwright test",
+    "playtest:all": "tsx src/playtest/headless-runner.ts && playwright test"
   },
   "dependencies": {
     "d3-delaunay": "^6.0.4",

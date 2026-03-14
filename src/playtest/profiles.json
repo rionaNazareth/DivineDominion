@@ -1,0 +1,95 @@
+{
+  "profiles": [
+    {
+      "id": "aggressive",
+      "eventBias": { "war": 0.9, "peace": 0.1, "science": 0.3, "faith": 0.5, "neutral": 0.5 },
+      "powerPolicy": {
+        "targetSelection": "military",
+        "rivalTargeting": "rival_strongest",
+        "maxActivePowers": 3,
+        "preferDisasters": true
+      },
+      "whisperPolicy": { "types": ["war", "faith"], "frequency": 0.8 },
+      "petitionPolicy": { "fulfill": ["military", "faith"], "deny": ["peace"] },
+      "castFrequency": "whenever_available"
+    },
+    {
+      "id": "passive",
+      "eventBias": { "war": 0.1, "peace": 0.9, "science": 0.7, "faith": 0.7, "neutral": 0.5 },
+      "powerPolicy": {
+        "targetSelection": "highest_faith",
+        "rivalTargeting": "never",
+        "maxActivePowers": 5,
+        "preferDisasters": false
+      },
+      "whisperPolicy": { "types": ["peace", "science"], "frequency": 0.5 },
+      "petitionPolicy": { "fulfill": ["faith"], "deny": [] },
+      "castFrequency": "energy_above_threshold"
+    },
+    {
+      "id": "hybrid",
+      "eventBias": { "war": 0.5, "peace": 0.5, "science": 0.6, "faith": 0.5, "neutral": 0.5 },
+      "powerPolicy": {
+        "targetSelection": "weakest_player_region",
+        "rivalTargeting": "rival_at_war",
+        "maxActivePowers": 4,
+        "preferDisasters": false
+      },
+      "whisperPolicy": { "types": ["science", "faith"], "frequency": 0.6 },
+      "petitionPolicy": { "fulfill": ["military", "faith", "peace", "science"], "deny": [] },
+      "castFrequency": "energy_above_threshold"
+    },
+    {
+      "id": "random",
+      "eventBias": { "war": 0.5, "peace": 0.5, "science": 0.5, "faith": 0.5, "neutral": 0.5 },
+      "powerPolicy": {
+        "targetSelection": "random",
+        "rivalTargeting": "random",
+        "maxActivePowers": 2,
+        "preferDisasters": false
+      },
+      "whisperPolicy": { "types": ["random"], "frequency": 0.5 },
+      "petitionPolicy": { "fulfill": ["random"], "deny": [] },
+      "castFrequency": "random"
+    },
+    {
+      "id": "optimal",
+      "eventBias": { "war": 0.4, "peace": 0.6, "science": 0.8, "faith": 0.6, "neutral": 0.5 },
+      "powerPolicy": {
+        "targetSelection": "lowest_dev_player",
+        "rivalTargeting": "highest_dev_rival",
+        "maxActivePowers": 4,
+        "preferDisasters": false
+      },
+      "whisperPolicy": { "types": ["science", "peace"], "frequency": 0.7 },
+      "petitionPolicy": { "fulfill": ["military", "faith", "peace", "science"], "deny": [] },
+      "castFrequency": "energy_above_threshold"
+    },
+    {
+      "id": "degenerate",
+      "eventBias": { "war": 0.1, "peace": 0.1, "science": 1.0, "faith": 0.1, "neutral": 0.5 },
+      "powerPolicy": {
+        "targetSelection": "highest_dev_player",
+        "rivalTargeting": "never",
+        "maxActivePowers": 6,
+        "preferDisasters": false
+      },
+      "whisperPolicy": { "types": ["science", "science"], "frequency": 1.0 },
+      "petitionPolicy": { "fulfill": [], "deny": [] },
+      "castFrequency": "energy_above_threshold"
+    },
+    {
+      "id": "no_input",
+      "eventBias": { "war": 0.0, "peace": 0.0, "science": 0.0, "faith": 0.0, "neutral": 0.0 },
+      "powerPolicy": {
+        "targetSelection": "none",
+        "rivalTargeting": "none",
+        "maxActivePowers": 0,
+        "preferDisasters": false
+      },
+      "whisperPolicy": { "types": [], "frequency": 0.0 },
+      "petitionPolicy": { "fulfill": [], "deny": [] },
+      "castFrequency": "never"
+    }
+  ]
+}
