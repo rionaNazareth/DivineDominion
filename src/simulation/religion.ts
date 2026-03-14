@@ -1,14 +1,15 @@
 import './immer-config.js';
 import { produce } from 'immer';
 
-import { RELIGION, COMMANDMENT_STACKING } from '../config/constants.js';
+import { COMMANDMENT_STACKING, HYPOCRISY, RELIGION } from '../config/constants.js';
 import type {
+  CommandmentEffects,
   GameState,
+  Region,
   RegionId,
   ReligionId,
-  WorldState,
-  Region,
   ReligionInfluence,
+  WorldState,
 } from '../types/game.js';
 import { seededRandom } from './prng.js';
 
@@ -71,8 +72,43 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 /**
+ * Compute the total schism risk (tension) from selected commandments.
+ * Sum of all schismRisk values from effectiveCommandmentEffects.
+ * Tension pairs each contribute their schismRisk modifier.
+ */
+function computeTotalTension(cmdEffects: CommandmentEffects | null): number {
+  if (!cmdEffects) return 0;
+  return cmdEffects.schismRisk ?? 0;
+}
+
+/**
+ * Schism check formula (D3.3): per tick, per region where player religion is dominant.
+ * Returns true if a schism fires in this region.
+ */
+function checkSchism(
+  region: Region,
+  totalTension: number,
+  hypocrisyLevel: number,
+  prng: () => number,
+): boolean {
+  if (totalTension <= 0) return false;
+
+  const happiness = region.happiness;
+  let schismProb = totalTension * HYPOCRISY.SCHISM_BASE_RISK_PER_TICK * (1 - happiness) * (1 + hypocrisyLevel);
+
+  if (totalTension >= HYPOCRISY.SCHISM_THRESHOLD) {
+    schismProb *= 2.0;
+  }
+
+  return prng() < schismProb;
+}
+
+/**
  * Heat-diffusion religion spread. Uses frozen snapshot per tick; updates
  * religiousInfluence and dominantReligion per region.
+ *
+ * D3.2: Missionary conversion (Prophet blessing) — one-sided, +MISSIONARY_CONVERSION_RATE/tick per adj region.
+ * D3.3: Schism check — per region where player religion is dominant; fires new religion.
  */
 export function tickReligionSpread(
   state: GameState,
@@ -84,7 +120,15 @@ export function tickReligionSpread(
     const religionIds = Array.from(world.religions.keys());
     religionIds.push(UNAFFILIATED_ID);
 
-    // Snapshot: region -> religion -> strength
+    const cmdEffects = draft.effectiveCommandmentEffects ?? null;
+    const cmdSpreadMod = cmdEffects?.missionaryEffectiveness ?? 0;
+    const cmdMissionaryMod = cmdEffects?.missionaryEffectiveness ?? 0;
+
+    const playerReligionId = draft.playerReligionId;
+    const hypocrisyLevel = draft.hypocrisyLevel;
+    const totalTension = computeTotalTension(cmdEffects);
+
+    // Snapshot: region -> religion -> strength (frozen at tick start per D3.2)
     const snapshot = new Map<RegionId, InfluenceMap>();
     for (const rid of regionIds) {
       const region = world.regions.get(rid);
@@ -98,8 +142,7 @@ export function tickReligionSpread(
       delta.set(rid, new Map() as InfluenceMap);
     }
 
-    const cmdSpreadMod = 0; // Phase 1c can inject player commandment passiveSpread
-
+    // D3.2 Heat diffusion: bidirectional flow between adjacent regions
     for (let i = 0; i < regionIds.length; i++) {
       const aId = regionIds[i];
       const regionA = world.regions.get(aId);
@@ -130,10 +173,7 @@ export function tickReligionSpread(
           const losingSnap = losingId === aId ? snapA : snapB;
           const dom = getDominantReligion(losingSnap);
           const domStr = dom ? losingSnap.get(dom) ?? 0 : 0;
-          if (
-            r === dom &&
-            domStr >= RELIGION.CONVERSION_DOMINANT_THRESHOLD
-          ) {
+          if (r === dom && domStr >= RELIGION.CONVERSION_DOMINANT_THRESHOLD) {
             effectiveGradient *= RELIGION.DOMINANCE_INERTIA;
           }
 
@@ -160,7 +200,47 @@ export function tickReligionSpread(
       }
     }
 
+    // D3.2 Missionary conversion: Prophet blessing in a region → one-sided spread to neighbors
+    for (const regionId of regionIds) {
+      const region = world.regions.get(regionId);
+      if (!region || region.terrain === 'ocean') continue;
+
+      const hasProphet = region.activeEffects.some((e) => e.powerId === 'prophet');
+      if (!hasProphet) continue;
+
+      // Find the religion with the highest influence in this region (the missionary's religion)
+      const snapSrc = snapshot.get(regionId)!;
+      let missionaryReligion: ReligionId | null = null;
+      let maxStr = 0;
+      for (const [rid, str] of snapSrc.entries()) {
+        if (rid === UNAFFILIATED_ID) continue;
+        if (str > maxStr) {
+          maxStr = str;
+          missionaryReligion = rid;
+        }
+      }
+      if (!missionaryReligion) continue;
+
+      const missionaryRate = RELIGION.MISSIONARY_CONVERSION_RATE *
+        (1 + clamp(cmdMissionaryMod, -0.50, 0.75));
+
+      for (const adjId of region.adjacentRegionIds) {
+        const adjRegion = world.regions.get(adjId);
+        if (!adjRegion || adjRegion.terrain === 'ocean') continue;
+
+        const terrainResist = getTerrainResistance(adjRegion.terrain);
+        const conversionFlow = missionaryRate * (1 - terrainResist);
+
+        const adjDelta = delta.get(adjId)!;
+        const prev = adjDelta.get(missionaryReligion) ?? 0;
+        adjDelta.set(missionaryReligion, prev + conversionFlow);
+        // Source region NOT reduced (one-sided per D3.2)
+      }
+    }
+
     // Apply deltas and normalize
+    const schismRegions: RegionId[] = [];
+
     for (const rid of regionIds) {
       const region = world.regions.get(rid);
       if (!region || region.terrain === 'ocean') continue;
@@ -174,7 +254,6 @@ export function tickReligionSpread(
         if (v > 0) next.set(r, v);
       }
 
-      // Clamp to non-negative (already by only setting v>0)
       let total = 0;
       for (const v of next.values()) total += v;
 
@@ -203,6 +282,49 @@ export function tickReligionSpread(
       region.dominantReligion = dominant ?? ('' as ReligionId);
       const faithSum = arr.reduce((s, x) => s + x.strength, 0);
       region.faithStrength = faithSum;
+
+      // D3.3 Collect regions eligible for schism check (player religion dominant)
+      if (dominant === playerReligionId) {
+        schismRegions.push(rid);
+      }
+    }
+
+    // D3.3 Schism check: per eligible region
+    if (schismRegions.length > 0 && totalTension > 0) {
+      let callIndex = draft.prngState;
+      for (const rid of schismRegions) {
+        const region = world.regions.get(rid);
+        if (!region) continue;
+        const prng = () => seededRandom(world.seed, world.currentTick, callIndex++);
+
+        if (checkSchism(region, totalTension, hypocrisyLevel, prng)) {
+          // Create a schism religion: split off some influence from the player religion
+          const schismId = `schism_${world.currentTick}_${rid}` as ReligionId;
+          const playerInfluenceEntry = region.religiousInfluence.find(
+            (ri) => ri.religionId === playerReligionId,
+          );
+          if (playerInfluenceEntry && playerInfluenceEntry.strength > 0.1) {
+            const splitAmount = playerInfluenceEntry.strength * 0.3;
+            playerInfluenceEntry.strength -= splitAmount;
+
+            region.religiousInfluence.push({
+              religionId: schismId,
+              strength: splitAmount,
+            });
+
+            // Register schism religion in world
+            world.religions.set(schismId, {
+              id: schismId,
+              name: `Schism of ${world.religions.get(playerReligionId)?.name ?? 'Unknown'}`,
+              color: '#888888',
+              symbol: '⚡',
+              commandments: [],
+              isPlayerReligion: false,
+            });
+          }
+        }
+        draft.prngState = callIndex;
+      }
     }
   });
 }

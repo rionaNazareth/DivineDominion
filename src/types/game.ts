@@ -271,6 +271,10 @@ export interface Army {
   state: ArmyState;
   commander: Commander | null;
   supplyRange: number;
+  /** Internal: ticks remaining to finish moving into the next region (Deliverable 7.1). */
+  movementTicksRemaining?: number;
+  /** Internal: ticks remaining to capture fortified region when sieging (Deliverable 7.3). */
+  siegeTicksRemaining?: number;
 }
 
 export type ArmyState =

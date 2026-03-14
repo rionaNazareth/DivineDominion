@@ -264,7 +264,7 @@ Use this when you need to **implement or fix** code. See `OVERVIEW.md` for the f
 | Nation AI decisions | `src/simulation/nation-ai.ts` | `__tests__/nation-ai.test.ts` |
 | Religion spread | `src/simulation/religion.ts` | `__tests__/religion.test.ts` |
 | Army management | `src/simulation/army.ts` | `__tests__/army.test.ts` |
-| Battle resolution | `src/simulation/battle.ts` | `__tests__/battle.test.ts` |
+| Battle resolution | `src/simulation/army.ts` (combined with army management) | `__tests__/army.test.ts` |
 | Disease system | `src/simulation/disease.ts` | `__tests__/disease.test.ts` |
 | Trade routes | `src/simulation/trade.ts` | `__tests__/trade.test.ts` |
 | Event engine | `src/simulation/events.ts` | `__tests__/events.test.ts` |

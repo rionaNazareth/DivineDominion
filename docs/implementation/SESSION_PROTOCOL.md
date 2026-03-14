@@ -146,3 +146,10 @@ After the commit succeeds, push the work to the canonical remote so progress is 
 - **PRNG only.** Use `src/simulation/prng.ts` for all randomness in `src/simulation/`.
 - **Immer always.** Use `produce()` for all state mutations.
 - **Deliverable names, not line numbers.** Reference formulas by "Deliverable N", test specs by "§N section name".
+- **No design/spec drift without explicit chat approval.**
+  - Default: implementation MUST match design docs + `formulas.md` + test-spec exactly.
+  - If the agent believes a deviation could **improve gameplay or deliver high value**, it MUST:
+    - (1) Clearly state which Deliverable / section it would drift from and how.
+    - (2) Ask the human in chat for **yes/no approval for that specific deviation**.
+  - Only if the human replies with explicit approval (e.g. “yes, go ahead with that drift”) may the deviation be implemented, and it must be documented in the session summary (and design/implementation docs if it becomes permanent).
+  - Deviations are **never** allowed purely for implementation convenience or to avoid complexity.
