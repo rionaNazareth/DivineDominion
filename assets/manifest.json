@@ -1,0 +1,113 @@
+{
+  "version": "1.1.0",
+  "game": "Divine Dominion",
+  "generated": "2026-03-12",
+  "assets": {
+    "icons": {
+      "cities": [
+        { "id": "city-1", "path": "icons/city-1.svg", "label": "Village", "size": "64x64" },
+        { "id": "city-2", "path": "icons/city-2.svg", "label": "Town", "size": "64x64" },
+        { "id": "city-3", "path": "icons/city-3.svg", "label": "City", "size": "64x64" },
+        { "id": "city-4", "path": "icons/city-4.svg", "label": "Metropolis", "size": "64x64" },
+        { "id": "city-5", "path": "icons/city-5.svg", "label": "Future City", "size": "64x64" }
+      ],
+      "religions": [
+        { "id": "religion-player", "path": "icons/religion-player.svg", "label": "Player Religion", "color": "#c9a84c" },
+        { "id": "religion-flame", "path": "icons/religion-flame.svg", "label": "Order of the Flame", "color": "#DC143C" },
+        { "id": "religion-harvest", "path": "icons/religion-harvest.svg", "label": "Children of the Harvest", "color": "#8FBC8F" },
+        { "id": "religion-deep", "path": "icons/religion-deep.svg", "label": "Watchers of the Deep", "color": "#191970" },
+        { "id": "religion-endings", "path": "icons/religion-endings.svg", "label": "Cult of Endings", "color": "#4A4A4A" },
+        { "id": "religion-unity", "path": "icons/religion-unity.svg", "label": "Seekers of Unity", "color": "#FFBF00" },
+        { "id": "religion-fortress", "path": "icons/religion-fortress.svg", "label": "The Silent Fortress", "color": "#708090" },
+        { "id": "religion-covenant", "path": "icons/religion-covenant.svg", "label": "Golden Covenant", "color": "#DAA520" },
+        { "id": "religion-wandering", "path": "icons/religion-wandering.svg", "label": "The Wandering Path", "color": "#008080" },
+        { "id": "religion-veil", "path": "icons/religion-veil.svg", "label": "Keepers of the Veil", "color": "#6A0DAD" },
+        { "id": "religion-iron", "path": "icons/religion-iron.svg", "label": "The Iron Dawn", "color": "#B22222" }
+      ],
+      "followerVoices": {
+        "rendering": "CODE-RENDERED",
+        "note": "Follower Voice icons (Prophet, Ruler, General, Scholar, Heretic) are code-rendered circles with SVG symbols. See art-spec.md §10d for colors and shapes."
+      }
+    },
+    "fonts": [
+      { "family": "Cinzel", "weights": [600, 700, 800, 900], "path": "fonts/", "source": "Google Fonts", "license": "OFL" },
+      { "family": "Source Serif 4", "weights": [400, 500, 600], "path": "fonts/", "source": "Google Fonts", "license": "OFL" }
+    ],
+    "music": {
+      "format": ["ogg", "mp3"],
+      "loopLength": "60-120s",
+      "tracks": [
+        { "id": "era-01", "path": "music/era-01", "label": "Renaissance", "status": "placeholder" },
+        { "id": "era-02", "path": "music/era-02", "label": "Exploration", "status": "placeholder" },
+        { "id": "era-03", "path": "music/era-03", "label": "Enlightenment", "status": "placeholder" },
+        { "id": "era-04", "path": "music/era-04", "label": "Revolution", "status": "placeholder" },
+        { "id": "era-05", "path": "music/era-05", "label": "Industry", "status": "placeholder" },
+        { "id": "era-06", "path": "music/era-06", "label": "Empire", "status": "placeholder" },
+        { "id": "era-07", "path": "music/era-07", "label": "Atomic", "status": "placeholder" },
+        { "id": "era-08", "path": "music/era-08", "label": "Digital", "status": "placeholder" },
+        { "id": "era-09", "path": "music/era-09", "label": "Signal", "status": "placeholder" },
+        { "id": "era-10", "path": "music/era-10", "label": "Revelation", "status": "placeholder" },
+        { "id": "era-11", "path": "music/era-11", "label": "Preparation", "status": "placeholder" },
+        { "id": "era-12", "path": "music/era-12", "label": "Arrival", "status": "placeholder" }
+      ]
+    },
+    "sfx": {
+      "format": "wav",
+      "maxConcurrent": 10,
+      "effects": [
+        { "id": "divine/harvest", "path": "sfx/divine/harvest.wav", "status": "placeholder" },
+        { "id": "divine/inspiration", "path": "sfx/divine/inspiration.wav", "status": "placeholder" },
+        { "id": "divine/miracle", "path": "sfx/divine/miracle.wav", "status": "placeholder" },
+        { "id": "divine/prophet", "path": "sfx/divine/prophet.wav", "status": "placeholder" },
+        { "id": "divine/shield", "path": "sfx/divine/shield.wav", "status": "placeholder" },
+        { "id": "divine/golden-age", "path": "sfx/divine/golden-age.wav", "status": "placeholder" },
+        { "id": "divine/earthquake", "path": "sfx/divine/earthquake.wav", "status": "placeholder" },
+        { "id": "divine/flood", "path": "sfx/divine/flood.wav", "status": "placeholder" },
+        { "id": "divine/plague", "path": "sfx/divine/plague.wav", "status": "placeholder" },
+        { "id": "divine/storm", "path": "sfx/divine/storm.wav", "status": "placeholder" },
+        { "id": "divine/famine", "path": "sfx/divine/famine.wav", "status": "placeholder" },
+        { "id": "divine/wildfire", "path": "sfx/divine/wildfire.wav", "status": "placeholder" },
+        { "id": "divine/whisper-cast", "path": "sfx/divine/whisper-cast.wav", "status": "placeholder" },
+        { "id": "divine/combo-trigger", "path": "sfx/divine/combo-trigger.wav", "status": "placeholder" },
+        { "id": "divine/voice-emerge", "path": "sfx/divine/voice-emerge.wav", "status": "placeholder" },
+        { "id": "divine/voice-death", "path": "sfx/divine/voice-death.wav", "status": "placeholder" },
+        { "id": "divine/petition", "path": "sfx/divine/petition.wav", "status": "placeholder" },
+        { "id": "divine/heretic", "path": "sfx/divine/heretic.wav", "status": "placeholder" },
+        { "id": "ui/event-notify", "path": "sfx/ui/event-notify.wav", "status": "placeholder" },
+        { "id": "ui/choice-confirm", "path": "sfx/ui/choice-confirm.wav", "status": "placeholder" },
+        { "id": "ui/outcome-reveal", "path": "sfx/ui/outcome-reveal.wav", "status": "placeholder" },
+        { "id": "ui/button-tap", "path": "sfx/ui/button-tap.wav", "status": "placeholder" },
+        { "id": "ui/menu-open", "path": "sfx/ui/menu-open.wav", "status": "placeholder" },
+        { "id": "ui/menu-close", "path": "sfx/ui/menu-close.wav", "status": "placeholder" },
+        { "id": "ui/fab-open", "path": "sfx/ui/fab-open.wav", "status": "placeholder" },
+        { "id": "ui/fab-close", "path": "sfx/ui/fab-close.wav", "status": "placeholder" },
+        { "id": "ui/toast", "path": "sfx/ui/toast.wav", "status": "placeholder" },
+        { "id": "ui/region-tap", "path": "sfx/ui/region-tap.wav", "status": "placeholder" },
+        { "id": "ui/overlay-toggle", "path": "sfx/ui/overlay-toggle.wav", "status": "placeholder" },
+        { "id": "ui/pause", "path": "sfx/ui/pause.wav", "status": "placeholder" },
+        { "id": "ui/unpause", "path": "sfx/ui/unpause.wav", "status": "placeholder" },
+        { "id": "ui/power-unlock", "path": "sfx/ui/power-unlock.wav", "status": "placeholder" },
+        { "id": "battle/clash", "path": "sfx/battle/clash.wav", "status": "placeholder" },
+        { "id": "battle/victory", "path": "sfx/battle/victory.wav", "status": "placeholder" },
+        { "id": "battle/defeat", "path": "sfx/battle/defeat.wav", "status": "placeholder" },
+        { "id": "battle/war-declared", "path": "sfx/battle/war-declared.wav", "status": "placeholder" },
+        { "id": "narrative/era-transition", "path": "sfx/narrative/era-transition.wav", "status": "placeholder" },
+        { "id": "narrative/game-won", "path": "sfx/narrative/game-won.wav", "status": "placeholder" },
+        { "id": "narrative/game-lost", "path": "sfx/narrative/game-lost.wav", "status": "placeholder" },
+        { "id": "harbinger/presence", "path": "sfx/harbinger/presence.wav", "status": "placeholder" },
+        { "id": "harbinger/corruption", "path": "sfx/harbinger/corruption.wav", "status": "placeholder" },
+        { "id": "harbinger/purge", "path": "sfx/harbinger/purge.wav", "status": "placeholder" },
+        { "id": "harbinger/signal", "path": "sfx/harbinger/signal.wav", "status": "placeholder" },
+        { "id": "alien/reveal-1", "path": "sfx/alien/reveal-1.wav", "status": "placeholder" },
+        { "id": "alien/reveal-2", "path": "sfx/alien/reveal-2.wav", "status": "placeholder" },
+        { "id": "alien/reveal-3", "path": "sfx/alien/reveal-3.wav", "status": "placeholder" },
+        { "id": "alien/reveal-4", "path": "sfx/alien/reveal-4.wav", "status": "placeholder" },
+        { "id": "alien/reveal-5", "path": "sfx/alien/reveal-5.wav", "status": "placeholder" }
+      ]
+    },
+    "branding": [
+      { "id": "app-icon", "path": "branding/app-icon.png", "size": "1024x1024", "status": "placeholder" },
+      { "id": "splash", "path": "branding/splash.png", "size": "1242x2688", "status": "placeholder" }
+    ]
+  }
+}

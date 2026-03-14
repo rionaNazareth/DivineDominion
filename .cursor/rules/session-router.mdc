@@ -1,0 +1,17 @@
+---
+description: Routes session commands to the correct protocol doc. Handles "run session N", "start validation session", and design changes.
+alwaysApply: true
+---
+# Session Router
+
+When the user says **"run session N"** or **"start session N"**:
+1. Read `docs/implementation/SESSION_PROTOCOL.md` — follow it exactly.
+2. The session number N maps to a phase doc listed in that file.
+
+When the user says **"start validation session 1"** or **"run validation session"**:
+1. Read `docs/implementation/VALIDATION_PROTOCOL.md` — follow it exactly.
+
+For **design changes** (modifying game rules, constants, formulas):
+1. Follow the protocol in `.cursor/rules/design-changes.mdc`.
+
+For anything else, proceed normally.

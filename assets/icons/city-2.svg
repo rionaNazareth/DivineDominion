@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Town: Pointed spire + cross -->
+  <!-- Stone wall base -->
+  <rect x="20" y="38" width="24" height="18" fill="#5a5a48" stroke="#7a7a68" stroke-width="1.5"/>
+  <!-- Left flanking house -->
+  <rect x="8" y="44" width="12" height="12" fill="#7a6a48" stroke="#8a7a58" stroke-width="1.5"/>
+  <path d="M8 44 L14 38 L20 44 Z" fill="#6a5a38" stroke="#8a7a58" stroke-width="1.5"/>
+  <!-- Right flanking house -->
+  <rect x="44" y="44" width="12" height="12" fill="#7a6a48" stroke="#8a7a58" stroke-width="1.5"/>
+  <path d="M44 44 L50 38 L56 44 Z" fill="#6a5a38" stroke="#8a7a58" stroke-width="1.5"/>
+  <!-- Church spire (dominant triangle) -->
+  <path d="M26 38 L32 8 L38 38 Z" fill="#5a5a48" stroke="#7a7a68" stroke-width="1.5"/>
+  <!-- Golden cross at peak -->
+  <path d="M32 8 L32 2" stroke="#c9a84c" stroke-width="2" stroke-linecap="round"/>
+  <path d="M29 5 L35 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M30 2 L34 2" stroke="#c9a84c" stroke-width="1" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commandment Selection — Wireframe Options</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #111;
+    color: #e0e0e0;
+    padding: 40px 20px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 28px;
+    color: #d4a857;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+    margin-bottom: 48px;
+  }
+  .options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px 48px;
+    max-width: 900px;
+    margin: 0 auto;
+    justify-items: center;
+  }
+  @media (max-width: 920px) {
+    .options { grid-template-columns: 1fr; }
+  }
+  .option-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 390px;
+    position: relative;
+  }
+  .option-wrapper.suggested .phone {
+    border-color: #d4a857;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px #d4a857;
+  }
+  .option-label {
+    font-size: 18px;
+    font-weight: 700;
+    color: #d4a857;
+    margin-bottom: 4px;
+  }
+  .option-desc {
+    font-size: 13px;
+    color: #999;
+    text-align: center;
+    margin-bottom: 16px;
+    max-width: 340px;
+    line-height: 1.4;
+  }
+  .phone {
+    width: 375px;
+    height: 812px;
+    background: #1a1a2e;
+    border-radius: 44px;
+    border: 3px solid #333;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .notch {
+    width: 150px;
+    height: 28px;
+    background: #111;
+    border-radius: 0 0 18px 18px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 10;
+  }
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 24px 0;
+    font-size: 11px;
+    color: #777;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 28px;
+    align-items: center;
+  }
+  .screen {
+    padding: 12px 16px;
+    height: calc(100% - 28px);
+    overflow-y: auto;
+    position: relative;
+  }
+  .screen::-webkit-scrollbar { width: 0; }
+
+  /* Header */
+  .screen-header {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .screen-header h2 {
+    font-size: 20px;
+    color: #d4a857;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .screen-header p {
+    font-size: 12px;
+    color: #777;
+  }
+  .counter {
+    display: inline-block;
+    background: rgba(212, 168, 87, 0.15);
+    border: 1px solid rgba(212, 168, 87, 0.3);
+    border-radius: 16px;
+    padding: 4px 14px;
+    font-size: 13px;
+    color: #d4a857;
+    margin-top: 8px;
+  }
+
+  /* === OPTION A: Tabs + Grid === */
+  .tabs {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    margin: 0 -16px 12px;
+    padding: 0 12px;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { height: 0; }
+  .tab {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: #888;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    color: #d4a857;
+    border-bottom-color: #d4a857;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding-bottom: 80px;
+  }
+  .card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 12px;
+    position: relative;
+    transition: all 0.2s;
+  }
+  .card.selected {
+    border-color: #d4a857;
+    background: rgba(212, 168, 87, 0.08);
+  }
+  .card.locked {
+    opacity: 0.5;
+  }
+  .card .name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #e0e0e0;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .card .effect {
+    font-size: 10px;
+    color: #888;
+    line-height: 1.3;
+  }
+  .card .check {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+  .card.selected .check {
+    background: #d4a857;
+    border-color: #d4a857;
+    color: #1a1a2e;
+  }
+  .card .lock-icon {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 14px;
+    opacity: 0.5;
+  }
+  .card .category-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  /* === OPTION B: Swipeable Cards === */
+  .deck-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+    position: relative;
+    height: calc(100% - 120px);
+  }
+  .big-card {
+    width: 300px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 28px 24px;
+    text-align: center;
+    position: relative;
+  }
+  .big-card .category-badge {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #d4a857;
+    margin-bottom: 16px;
+  }
+  .big-card .cmd-name {
+    font-size: 22px;
+    font-weight: 700;
+    color: #e0e0e0;
+    margin-bottom: 8px;
+  }
+  .big-card .flavor {
+    font-size: 13px;
+    color: #999;
+    font-style: italic;
+    margin-bottom: 20px;
+    line-height: 1.4;
+  }
+  .big-card .mech-effect {
+    font-size: 13px;
+    color: #aaa;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 20px;
+    line-height: 1.4;
+  }
+  .big-card .tension-warn {
+    font-size: 11px;
+    color: #e07a5f;
+    background: rgba(224, 122, 95, 0.1);
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-bottom: 16px;
+  }
+  .add-btn {
+    background: #d4a857;
+    color: #1a1a2e;
+    border: none;
+    border-radius: 24px;
+    padding: 12px 32px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .swipe-hint {
+    display: flex;
+    justify-content: space-between;
+    width: 300px;
+    margin-top: 16px;
+    font-size: 11px;
+    color: #555;
+  }
+  .card-shadow-1, .card-shadow-2 {
+    position: absolute;
+    width: 280px;
+    height: 30px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+  }
+  .card-shadow-1 { bottom: -8px; left: 50%; transform: translateX(-50%); }
+  .card-shadow-2 { bottom: -16px; left: 50%; transform: translateX(-50%); width: 260px; opacity: 0.5; }
+  .dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #444;
+  }
+  .dot.active { background: #d4a857; width: 18px; border-radius: 3px; }
+
+  /* === OPTION C: Scrolling List === */
+  .search-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .search-input {
+    flex: 1;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #888;
+  }
+  .filter-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #888;
+    white-space: nowrap;
+  }
+  .category-header {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #d4a857;
+    padding: 12px 0 6px;
+    border-bottom: 1px solid rgba(212, 168, 87, 0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .category-header .arrow { font-size: 10px; color: #666; }
+  .list-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    gap: 10px;
+  }
+  .list-toggle {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 2px solid rgba(255,255,255,0.2);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+  .list-toggle.on {
+    background: #d4a857;
+    border-color: #d4a857;
+    color: #1a1a2e;
+  }
+  .list-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .list-info .name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e0e0e0;
+  }
+  .list-info .effect {
+    font-size: 11px;
+    color: #777;
+    margin-top: 2px;
+  }
+  .list-info .tension {
+    font-size: 10px;
+    color: #e07a5f;
+    margin-top: 2px;
+  }
+  .list-chevron {
+    color: #444;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* === OPTION D: Hybrid === */
+  .mode-toggle {
+    display: flex;
+    background: rgba(255,255,255,0.06);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .mode-toggle button {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #777;
+    padding: 8px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .mode-toggle button.active {
+    background: rgba(212, 168, 87, 0.15);
+    color: #d4a857;
+  }
+
+  /* Bottom bar */
+  .bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, #1a1a2e 30%);
+    padding: 40px 16px 34px;
+    text-align: center;
+  }
+  .confirm-btn {
+    background: #d4a857;
+    color: #1a1a2e;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 0;
+    font-size: 16px;
+    font-weight: 700;
+    width: 100%;
+    cursor: pointer;
+  }
+  .confirm-btn.disabled {
+    opacity: 0.4;
+  }
+
+  /* Pros/Cons under each phone */
+  .pros-cons {
+    margin-top: 20px;
+    max-width: 340px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .pros-cons .pro { color: #81b29a; }
+  .pros-cons .con { color: #e07a5f; }
+  .pros-cons div { margin-bottom: 3px; }
+
+  .home-indicator {
+    width: 134px;
+    height: 4px;
+    background: #555;
+    border-radius: 2px;
+    margin: 0 auto;
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .section-divider {
+    width: 100%;
+    max-width: 1200px;
+    margin: 60px auto 40px;
+    border-top: 1px solid #333;
+    text-align: center;
+    padding-top: 16px;
+    color: #666;
+    font-size: 13px;
+  }
+  .rec-badge {
+    display: inline-block;
+    background: rgba(212, 168, 87, 0.12);
+    border: 1px solid rgba(212, 168, 87, 0.3);
+    color: #d4a857;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<h1>DIVINE DOMINION</h1>
+<p class="subtitle">Decision Point 1 — Commandment Selection Layout Wireframes</p>
+
+<div class="options">
+
+  <!-- ========== OPTION A: Category Tabs + Grid ========== -->
+  <div class="option-wrapper">
+    <div class="option-label">Option A: Category Tabs + Grid</div>
+    <div class="option-desc">7 category tabs, 2-column card grid per category. Familiar app-store pattern.</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>⚡ 87%</span></div>
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="screen-header">
+          <h2>Your Commandments</h2>
+          <p>Choose 10 laws to shape your religion</p>
+          <div class="counter">4 / 10 selected</div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab">Expansion</div>
+          <div class="tab active">Conflict</div>
+          <div class="tab">Knowledge</div>
+          <div class="tab">Society</div>
+          <div class="tab">Divine</div>
+          <div class="tab">Nature</div>
+          <div class="tab">Morality</div>
+        </div>
+
+        <div class="grid">
+          <div class="card selected">
+            <div class="check">✓</div>
+            <div class="name">Turn the Other Cheek</div>
+            <div class="effect">Can't declare wars; +20% sympathy conversion</div>
+          </div>
+          <div class="card">
+            <div class="check"></div>
+            <div class="name">Righteous Defense</div>
+            <div class="effect">Can't declare wars; +30% counter-attack</div>
+          </div>
+          <div class="card selected">
+            <div class="check">✓</div>
+            <div class="name">Smite the Wicked</div>
+            <div class="effect">Holy wars; +20% morale, -40% diplomacy</div>
+          </div>
+          <div class="card">
+            <div class="check"></div>
+            <div class="name">Conquer and Enlighten</div>
+            <div class="effect">Conquest with integration bonuses</div>
+          </div>
+          <div class="card">
+            <div class="check"></div>
+            <div class="name">Diplomatic Union</div>
+            <div class="effect">+30% diplomacy, -15% military</div>
+          </div>
+          <div class="card locked">
+            <div class="lock-icon">🔒</div>
+            <div class="name">Holy Crusade</div>
+            <div class="effect">Full Game Unlock</div>
+          </div>
+        </div>
+
+        <div class="bottom-bar">
+          <button class="confirm-btn disabled">Confirm Laws (4/10)</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+    <div class="pros-cons">
+      <div class="pro">+ Easy scanning, all options visible per category</div>
+      <div class="pro">+ Familiar pattern (app store tabs)</div>
+      <div class="con">− Tabs cramped on small phones</div>
+      <div class="con">− Comparing across categories requires tab-switching</div>
+    </div>
+  </div>
+
+  <!-- ========== OPTION B: Swipeable Card Deck ========== -->
+  <div class="option-wrapper">
+    <div class="option-label">Option B: Swipeable Card Deck</div>
+    <div class="option-desc">One commandment per screen, swipe to browse. Beautiful but slow at 50 items.</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>⚡ 87%</span></div>
+      <div class="notch"></div>
+      <div class="screen" style="display:flex;flex-direction:column;">
+        <div class="screen-header">
+          <h2>Your Commandments</h2>
+          <div class="counter">4 / 10 selected</div>
+        </div>
+
+        <div class="deck-container">
+          <div style="position:relative;">
+            <div class="big-card">
+              <div class="category-badge">⚔ Conflict</div>
+              <div class="cmd-name">Smite the Wicked</div>
+              <div class="flavor">"Let righteousness be your blade."</div>
+              <div class="mech-effect">Holy wars enabled<br>+20% morale · −40% diplomacy</div>
+              <div class="tension-warn">⚠ Tension with "Turn the Other Cheek" (+25% schism)</div>
+              <button class="add-btn">Add to My Laws</button>
+            </div>
+            <div class="card-shadow-1"></div>
+            <div class="card-shadow-2"></div>
+          </div>
+          <div class="swipe-hint">
+            <span>← Righteous Defense</span>
+            <span>Conquer & Enlighten →</span>
+          </div>
+          <div class="dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot active"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+
+        <div class="bottom-bar">
+          <button class="confirm-btn disabled">Confirm Laws (4/10)</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+    <div class="pros-cons">
+      <div class="pro">+ Beautiful, focused, immersive feel</div>
+      <div class="pro">+ Great for first-time players (one decision at a time)</div>
+      <div class="con">− Very slow to browse 25-50 commandments</div>
+      <div class="con">− Returning players who know what they want will hate this</div>
+    </div>
+  </div>
+
+  <!-- ========== OPTION C: Scrolling List ========== -->
+  <div class="option-wrapper">
+    <div class="option-label">Option C: Scrolling List + Filters</div>
+    <div class="option-desc">Compact list with collapsible categories and search. Fastest for veterans.</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>⚡ 87%</span></div>
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="screen-header">
+          <h2>Your Commandments</h2>
+          <p>Choose 10 laws to shape your religion</p>
+          <div class="counter">4 / 10 selected</div>
+        </div>
+
+        <div class="search-bar">
+          <div class="search-input">🔍 Search commandments...</div>
+          <div class="filter-btn">⚠ Tensions</div>
+        </div>
+
+        <div class="category-header">
+          <span>⚔ Conflict</span>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="list-item">
+          <div class="list-toggle on">✓</div>
+          <div class="list-info">
+            <div class="name">Turn the Other Cheek</div>
+            <div class="effect">Can't declare wars; +20% sympathy conversion</div>
+          </div>
+          <div class="list-chevron">›</div>
+        </div>
+        <div class="list-item">
+          <div class="list-toggle"></div>
+          <div class="list-info">
+            <div class="name">Righteous Defense</div>
+            <div class="effect">Can't declare wars; +30% counter-attack</div>
+          </div>
+          <div class="list-chevron">›</div>
+        </div>
+        <div class="list-item">
+          <div class="list-toggle on">✓</div>
+          <div class="list-info">
+            <div class="name">Smite the Wicked</div>
+            <div class="effect">Holy wars; +20% morale, -40% diplomacy</div>
+            <div class="tension">⚠ Conflicts with Turn the Other Cheek</div>
+          </div>
+          <div class="list-chevron">›</div>
+        </div>
+        <div class="list-item">
+          <div class="list-toggle"></div>
+          <div class="list-info">
+            <div class="name">Conquer and Enlighten</div>
+            <div class="effect">Conquest with integration bonuses</div>
+          </div>
+          <div class="list-chevron">›</div>
+        </div>
+        <div class="list-item">
+          <div class="list-toggle"></div>
+          <div class="list-info">
+            <div class="name">Diplomatic Union</div>
+            <div class="effect">+30% diplomacy, -15% military</div>
+          </div>
+          <div class="list-chevron">›</div>
+        </div>
+
+        <div class="category-header">
+          <span>📖 Knowledge</span>
+          <span class="arrow">▶</span>
+        </div>
+        <div class="category-header">
+          <span>🏛 Society</span>
+          <span class="arrow">▶</span>
+        </div>
+        <div class="category-header">
+          <span>✨ Divine</span>
+          <span class="arrow">▶</span>
+        </div>
+        <div class="category-header">
+          <span>🌿 Nature</span>
+          <span class="arrow">▶</span>
+        </div>
+
+        <div style="height:80px"></div>
+        <div class="bottom-bar">
+          <button class="confirm-btn disabled">Confirm Laws (4/10)</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+    <div class="pros-cons">
+      <div class="pro">+ Fastest browsing for experienced players</div>
+      <div class="pro">+ Search + filter scales well to 50 commandments</div>
+      <div class="pro">+ Tension warnings inline</div>
+      <div class="con">− Looks like a settings page, not a sacred moment</div>
+      <div class="con">− Less visually impactful for first-timers</div>
+    </div>
+  </div>
+
+  <!-- ========== OPTION D: Hybrid (RECOMMENDED) ========== -->
+  <div class="option-wrapper suggested">
+    <div class="option-label">Option D: Hybrid <span class="rec-badge">Suggested</span></div>
+    <div class="option-desc">Category tabs + grid by default. Toggle to compact list mode. Best of A + C. First-timers get visual cards, veterans switch to list.</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>⚡ 87%</span></div>
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="screen-header">
+          <h2>Your Commandments</h2>
+          <p>Choose 10 laws to shape your religion</p>
+          <div class="counter">4 / 10 selected</div>
+        </div>
+
+        <div class="mode-toggle">
+          <button class="active">▦ Cards</button>
+          <button>≡ List</button>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active">All</div>
+          <div class="tab">Expansion</div>
+          <div class="tab">Conflict</div>
+          <div class="tab">Knowledge</div>
+          <div class="tab">Society</div>
+          <div class="tab">Divine</div>
+          <div class="tab">Nature</div>
+          <div class="tab">Morality</div>
+        </div>
+
+        <div class="grid">
+          <div class="card selected">
+            <div class="check">✓</div>
+            <div class="category-dot" style="background:#e07a5f"></div>
+            <div class="name">Turn the Other Cheek</div>
+            <div class="effect">Can't declare wars; +20% sympathy conversion</div>
+          </div>
+          <div class="card selected">
+            <div class="check">✓</div>
+            <div class="category-dot" style="background:#e07a5f"></div>
+            <div class="name">Smite the Wicked</div>
+            <div class="effect" style="margin-bottom:4px">Holy wars; +20% morale</div>
+            <div style="font-size:9px;color:#e07a5f;">⚠ Tension pair</div>
+          </div>
+          <div class="card selected">
+            <div class="check">✓</div>
+            <div class="category-dot" style="background:#81b29a"></div>
+            <div class="name">Seek Truth Above All</div>
+            <div class="effect">+30% research, +10% schism</div>
+          </div>
+          <div class="card selected">
+            <div class="check">✓</div>
+            <div class="category-dot" style="background:#7eb5d6"></div>
+            <div class="name">Share All Wealth</div>
+            <div class="effect">+25% happiness, -10% economy</div>
+          </div>
+          <div class="card">
+            <div class="check"></div>
+            <div class="category-dot" style="background:#7eb5d6"></div>
+            <div class="name">Reward the Strong</div>
+            <div class="effect">+15% economy, +inequality</div>
+          </div>
+          <div class="card">
+            <div class="check"></div>
+            <div class="category-dot" style="background:#c9a0dc"></div>
+            <div class="name">Signs and Wonders</div>
+            <div class="effect">Miracles more effective</div>
+          </div>
+          <div class="card">
+            <div class="check"></div>
+            <div class="category-dot" style="background:#e8c170"></div>
+            <div class="name">The Earth is Sacred</div>
+            <div class="effect">Disasters -50%; -10% industry</div>
+          </div>
+          <div class="card">
+            <div class="check"></div>
+            <div class="category-dot" style="background:#d4a0a0"></div>
+            <div name="name">All Life is Sacred</div>
+            <div class="effect">No plague/famine; +25% diplomacy</div>
+          </div>
+        </div>
+
+        <div class="bottom-bar">
+          <button class="confirm-btn disabled">Confirm Laws (4/10)</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+    <div class="pros-cons">
+      <div class="pro">+ Cards view feels sacred and visual for first-timers</div>
+      <div class="pro">+ "All" tab lets you browse everything at once</div>
+      <div class="pro">+ List toggle for veterans who want speed</div>
+      <div class="pro">+ Category color dots for quick scanning</div>
+      <div class="pro">+ Tension warnings visible in both modes</div>
+      <div class="con">− Two modes means slightly more UI to build</div>
+    </div>
+  </div>
+
+</div>
+
+<div style="text-align:center;margin:48px 0 24px;color:#666;font-size:13px;">
+  All wireframes are portrait-mode, 375×812pt (iPhone standard). Touch targets ≥ 44pt.
+</div>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- City: Dome + two flanking towers -->
+  <!-- Left tower -->
+  <rect x="8" y="36" width="12" height="28" fill="#4a5568" stroke="#6a7588" stroke-width="1.5"/>
+  <path d="M8 36 L14 24 L20 36 Z" fill="#5a6a7a" stroke="#6a7588" stroke-width="1.5"/>
+  <!-- Right tower -->
+  <rect x="44" y="36" width="12" height="28" fill="#4a5568" stroke="#6a7588" stroke-width="1.5"/>
+  <path d="M44 36 L50 24 L56 36 Z" fill="#5a6a7a" stroke="#6a7588" stroke-width="1.5"/>
+  <!-- Central cathedral dome (ellipse, largest) -->
+  <ellipse cx="32" cy="38" rx="18" ry="12" fill="#4a5568" stroke="#6a7588" stroke-width="1.5"/>
+  <path d="M14 38 Q32 18 50 38" fill="#5a6a7a" stroke="#6a7588" stroke-width="1.5"/>
+  <!-- Gold spire tip on dome -->
+  <circle cx="32" cy="18" r="3" fill="#c9a84c" stroke="#e0c060" stroke-width="1"/>
+  <!-- Warm window lights -->
+  <rect x="12" y="42" width="4" height="6" fill="#c9a84c" opacity="0.9"/>
+  <rect x="48" y="42" width="4" height="6" fill="#c9a84c" opacity="0.9"/>
+  <rect x="26" y="42" width="4" height="6" fill="#c9a84c" opacity="0.9"/>
+  <rect x="34" y="42" width="4" height="6" fill="#c9a84c" opacity="0.9"/>
+</svg>

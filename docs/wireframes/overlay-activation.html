@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Divine Overlay Activation — Wireframe Options</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #111;
+    color: #e0e0e0;
+    padding: 40px 20px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 28px;
+    color: #d4a857;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+    margin-bottom: 48px;
+  }
+  .options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 48px;
+    max-width: 940px;
+    margin: 0 auto;
+    justify-items: center;
+  }
+  @media (max-width: 920px) {
+    .options { grid-template-columns: 1fr; }
+  }
+  .option-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 390px;
+    position: relative;
+  }
+  .option-label {
+    font-size: 18px;
+    font-weight: 700;
+    color: #d4a857;
+    margin-bottom: 4px;
+  }
+  .option-desc {
+    font-size: 13px;
+    color: #999;
+    text-align: center;
+    margin-bottom: 16px;
+    max-width: 340px;
+    line-height: 1.4;
+  }
+  .phone {
+    width: 340px;
+    height: 720px;
+    background: #1a1a2e;
+    border-radius: 40px;
+    border: 3px solid #333;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    cursor: pointer;
+    transition: border-color 0.3s;
+  }
+  .phone:hover {
+    border-color: #555;
+  }
+  .phone.active {
+    border-color: #d4a857;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px #d4a857;
+  }
+  .notch {
+    width: 130px;
+    height: 26px;
+    background: #111;
+    border-radius: 0 0 16px 16px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 10;
+  }
+  .home-indicator {
+    width: 120px;
+    height: 4px;
+    background: #444;
+    border-radius: 2px;
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+  }
+
+  /* Map area */
+  .map {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, #1a2a1a 0%, #1a1a2e 40%, #0d1a2e 100%);
+    overflow: hidden;
+  }
+  .map-region {
+    position: absolute;
+    border-radius: 40%;
+    opacity: 0.4;
+  }
+  .map-region.r1 { width: 120px; height: 90px; top: 180px; left: 30px; background: #2a4a2a; }
+  .map-region.r2 { width: 150px; height: 110px; top: 250px; left: 100px; background: #2a3a2a; }
+  .map-region.r3 { width: 100px; height: 80px; top: 160px; left: 170px; background: #3a4a3a; }
+  .map-region.r4 { width: 130px; height: 100px; top: 340px; left: 50px; background: #2a4a3a; }
+  .map-region.r5 { width: 110px; height: 85px; top: 380px; left: 160px; background: #3a4a2a; }
+  .map-region.r6 { width: 90px; height: 70px; top: 300px; left: 200px; background: #2a3a3a; }
+  .map-ocean { position: absolute; width: 60px; height: 200px; top: 200px; left: 5px; background: #0a1a3a; border-radius: 50%; opacity: 0.3; }
+  .map-ocean2 { position: absolute; width: 80px; height: 160px; top: 350px; right: 10px; background: #0a1a3a; border-radius: 50%; opacity: 0.3; }
+
+  .trade-route {
+    position: absolute;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #d4a857, transparent);
+    opacity: 0.3;
+    transform-origin: left center;
+  }
+  .tr1 { width: 100px; top: 280px; left: 80px; transform: rotate(-15deg); }
+  .tr2 { width: 80px; top: 350px; left: 130px; transform: rotate(25deg); }
+
+  .city-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d4a857;
+    box-shadow: 0 0 6px rgba(212,168,87,0.5);
+  }
+  .cd1 { top: 220px; left: 80px; }
+  .cd2 { top: 280px; left: 160px; }
+  .cd3 { top: 370px; left: 100px; }
+  .cd4 { top: 200px; left: 220px; }
+  .cd5 { top: 400px; left: 210px; }
+
+  /* Top HUD */
+  .top-hud {
+    position: absolute;
+    top: 30px;
+    left: 12px;
+    right: 12px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 5;
+  }
+  .hud-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .speed-pill {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid #555;
+    border-radius: 12px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: #ccc;
+    backdrop-filter: blur(4px);
+  }
+  .year-label {
+    font-size: 13px;
+    color: #d4a857;
+    font-weight: 600;
+  }
+  .era-label {
+    font-size: 10px;
+    color: #888;
+  }
+  .hud-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .hud-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .energy-pill {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid #5588cc;
+    border-radius: 12px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: #88bbee;
+    backdrop-filter: blur(4px);
+  }
+  .faith-bar {
+    width: 50px;
+    height: 6px;
+    background: #333;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .faith-fill {
+    height: 100%;
+    width: 65%;
+    background: linear-gradient(90deg, #d4a857, #e8c878);
+    border-radius: 3px;
+  }
+
+  /* FAB */
+  .fab {
+    position: absolute;
+    bottom: 40px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #d4a857, #b8922e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 4px 16px rgba(212,168,87,0.4);
+    z-index: 6;
+  }
+
+  /* Eye button (for options A and D) */
+  .eye-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid #6a5acd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    backdrop-filter: blur(4px);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .eye-btn.active-eye {
+    background: rgba(106,90,205,0.3);
+    border-color: #9a8aed;
+    box-shadow: 0 0 10px rgba(106,90,205,0.4);
+  }
+
+  /* Overlay active state */
+  .overlay-active .map-region {
+    opacity: 0.15;
+  }
+  .overlay-layer {
+    display: none;
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 3;
+  }
+  .overlay-active .overlay-layer {
+    display: block;
+  }
+  .religion-heat {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.35;
+  }
+  .rh1 { width: 140px; height: 120px; top: 180px; left: 40px; background: radial-gradient(circle, #d4a857 0%, transparent 70%); }
+  .rh2 { width: 100px; height: 90px; top: 350px; left: 60px; background: radial-gradient(circle, #d4a857 0%, transparent 70%); }
+  .rh3 { width: 120px; height: 100px; top: 250px; left: 150px; background: radial-gradient(circle, #5566cc 0%, transparent 70%); }
+  .rh4 { width: 90px; height: 80px; top: 370px; left: 170px; background: radial-gradient(circle, #cc5555 0%, transparent 70%); }
+
+  .attack-arrow {
+    position: absolute;
+    font-size: 16px;
+    color: #ff6666;
+    opacity: 0.7;
+  }
+  .aa1 { top: 310px; left: 140px; transform: rotate(30deg); }
+  .aa2 { top: 240px; left: 195px; transform: rotate(120deg); }
+
+  .tension-border {
+    position: absolute;
+    border: 2px dashed #ff4444;
+    border-radius: 40%;
+    opacity: 0.5;
+  }
+  .tb1 { width: 60px; height: 45px; top: 290px; left: 175px; }
+
+  /* Layer picker */
+  .layer-picker {
+    display: none;
+    position: absolute;
+    bottom: 110px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.8);
+    border: 1px solid #555;
+    border-radius: 12px;
+    padding: 8px;
+    gap: 4px;
+    z-index: 8;
+    backdrop-filter: blur(8px);
+    flex-direction: row;
+  }
+  .overlay-active .layer-picker {
+    display: flex;
+  }
+  .layer-btn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 10px;
+    border: 1px solid #444;
+    color: #aaa;
+    background: transparent;
+    white-space: nowrap;
+  }
+  .layer-btn.active-layer {
+    background: rgba(106,90,205,0.3);
+    border-color: #6a5acd;
+    color: #c8b8ff;
+  }
+
+  /* Option-specific: FAB radial for option B */
+  .fab-radial {
+    display: none;
+    position: absolute;
+    bottom: 40px;
+    right: 20px;
+    width: 200px;
+    height: 200px;
+    z-index: 7;
+  }
+  .radial-btn {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    border: 1px solid;
+  }
+  .rb-blessing {
+    background: rgba(212,168,87,0.2);
+    border-color: #d4a857;
+  }
+  .rb-disaster {
+    background: rgba(200,60,60,0.2);
+    border-color: #cc4444;
+  }
+  .rb-eye {
+    background: rgba(106,90,205,0.3);
+    border-color: #6a5acd;
+    box-shadow: 0 0 10px rgba(106,90,205,0.3);
+  }
+  .rb1 { top: 10px; left: 80px; }
+  .rb2 { top: 30px; left: 30px; }
+  .rb3 { top: 80px; left: 5px; }
+  .rb4 { top: 130px; left: 20px; }
+  .rb5 { top: 155px; left: 70px; }
+  .rb-center { top: 80px; left: 80px; width: 44px; height: 44px; }
+
+  /* Long-press indicator for option C */
+  .longpress-indicator {
+    display: none;
+    position: absolute;
+    top: 300px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 8;
+  }
+  .lp-ripple {
+    width: 80px;
+    height: 80px;
+    border: 2px solid rgba(106,90,205,0.5);
+    border-radius: 50%;
+    position: relative;
+  }
+  .lp-ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 12px;
+    height: 12px;
+    background: rgba(106,90,205,0.6);
+    border-radius: 50%;
+  }
+  .lp-label {
+    text-align: center;
+    font-size: 10px;
+    color: #9a8aed;
+    margin-top: 8px;
+  }
+
+  /* Annotation callouts */
+  .callout {
+    position: absolute;
+    z-index: 9;
+    pointer-events: none;
+  }
+  .callout-box {
+    background: rgba(212,168,87,0.15);
+    border: 1px solid #d4a857;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 10px;
+    color: #d4a857;
+    white-space: nowrap;
+  }
+  .callout-line {
+    width: 1px;
+    background: #d4a857;
+    opacity: 0.5;
+  }
+  .callout-dot {
+    width: 6px;
+    height: 6px;
+    background: #d4a857;
+    border-radius: 50%;
+  }
+
+  /* Pros/cons box */
+  .analysis {
+    margin-top: 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 16px;
+    width: 340px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .analysis h3 {
+    color: #d4a857;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  .pro { color: #6dca6d; }
+  .con { color: #cc6666; }
+  .analysis ul {
+    list-style: none;
+    padding: 0;
+  }
+  .analysis li {
+    margin-bottom: 4px;
+    padding-left: 16px;
+    position: relative;
+  }
+  .analysis li::before {
+    position: absolute;
+    left: 0;
+  }
+  .analysis li.pro::before { content: '✓'; color: #6dca6d; }
+  .analysis li.con::before { content: '✗'; color: #cc6666; }
+
+  /* Toggle states */
+  .phone .state-default { display: block; }
+  .phone .state-overlay { display: none; }
+  .phone.overlay-active .state-default { display: none; }
+  .phone.overlay-active .state-overlay { display: block; }
+
+  /* Interaction hint */
+  .tap-hint {
+    text-align: center;
+    font-size: 11px;
+    color: #666;
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  /* Comparison footer */
+  .comparison {
+    max-width: 900px;
+    margin: 60px auto 0;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    padding: 28px;
+  }
+  .comparison h2 {
+    color: #d4a857;
+    font-size: 20px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .comparison table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .comparison th {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid #333;
+    color: #d4a857;
+    font-weight: 600;
+  }
+  .comparison td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #1a1a1a;
+    color: #ccc;
+    vertical-align: top;
+  }
+  .score { font-weight: 700; }
+  .score-high { color: #6dca6d; }
+  .score-mid { color: #ccaa44; }
+  .score-low { color: #cc6666; }
+</style>
+</head>
+<body>
+
+<h1>Divine Overlay Activation</h1>
+<p class="subtitle">Tap each phone to toggle the overlay on/off and see the interaction</p>
+
+<div class="options">
+
+  <!-- OPTION A: Dedicated HUD Button -->
+  <div class="option-wrapper">
+    <div class="option-label">Option A: Dedicated HUD Button</div>
+    <div class="option-desc">Persistent "eye" icon in the top bar. Tap to toggle overlay. Layer picker appears when active.</div>
+    <div class="phone" id="phoneA" onclick="toggleOverlay('phoneA')">
+      <div class="notch"></div>
+      <div class="map">
+        <div class="map-ocean"></div>
+        <div class="map-ocean2"></div>
+        <div class="map-region r1"></div>
+        <div class="map-region r2"></div>
+        <div class="map-region r3"></div>
+        <div class="map-region r4"></div>
+        <div class="map-region r5"></div>
+        <div class="map-region r6"></div>
+        <div class="trade-route tr1"></div>
+        <div class="trade-route tr2"></div>
+        <div class="city-dot cd1"></div>
+        <div class="city-dot cd2"></div>
+        <div class="city-dot cd3"></div>
+        <div class="city-dot cd4"></div>
+        <div class="city-dot cd5"></div>
+        <div class="overlay-layer">
+          <div class="religion-heat rh1"></div>
+          <div class="religion-heat rh2"></div>
+          <div class="religion-heat rh3"></div>
+          <div class="religion-heat rh4"></div>
+          <div class="attack-arrow aa1">⟶</div>
+          <div class="attack-arrow aa2">⟶</div>
+          <div class="tension-border tb1"></div>
+        </div>
+      </div>
+      <!-- HUD -->
+      <div class="top-hud">
+        <div class="hud-left">
+          <div class="speed-pill">2×</div>
+        </div>
+        <div class="hud-center">
+          <div class="year-label">1743</div>
+          <div class="era-label">Enlightenment</div>
+        </div>
+        <div class="hud-right">
+          <div class="energy-pill">⚡ 14</div>
+          <div class="eye-btn" id="eyeA">👁</div>
+        </div>
+      </div>
+      <div class="fab">✦</div>
+      <div class="layer-picker">
+        <div class="layer-btn active-layer">Religion</div>
+        <div class="layer-btn">Military</div>
+        <div class="layer-btn">Trade</div>
+        <div class="layer-btn">Science</div>
+      </div>
+      <!-- Callout: eye button -->
+      <div class="callout" style="top: 30px; right: 60px;">
+        <div class="callout-box">← Always visible eye icon</div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+    <div class="tap-hint">Tap phone to toggle overlay</div>
+    <div class="analysis">
+      <ul>
+        <li class="pro">Always discoverable — visible at all times</li>
+        <li class="pro">One tap to toggle — simple mental model</li>
+        <li class="pro">Screen reader friendly</li>
+        <li class="con">Uses HUD space (one more icon in top bar)</li>
+        <li class="con">Adds visual clutter to minimal interface</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- OPTION B: FAB Sub-Menu -->
+  <div class="option-wrapper">
+    <div class="option-label">Option B: FAB Sub-Menu</div>
+    <div class="option-desc">"Divine Eye" button lives inside the FAB radial menu. Tap FAB → tap eye in center of radial.</div>
+    <div class="phone" id="phoneB" onclick="toggleOverlay('phoneB')">
+      <div class="notch"></div>
+      <div class="map">
+        <div class="map-ocean"></div>
+        <div class="map-ocean2"></div>
+        <div class="map-region r1"></div>
+        <div class="map-region r2"></div>
+        <div class="map-region r3"></div>
+        <div class="map-region r4"></div>
+        <div class="map-region r5"></div>
+        <div class="map-region r6"></div>
+        <div class="trade-route tr1"></div>
+        <div class="trade-route tr2"></div>
+        <div class="city-dot cd1"></div>
+        <div class="city-dot cd2"></div>
+        <div class="city-dot cd3"></div>
+        <div class="city-dot cd4"></div>
+        <div class="city-dot cd5"></div>
+        <div class="overlay-layer">
+          <div class="religion-heat rh1"></div>
+          <div class="religion-heat rh2"></div>
+          <div class="religion-heat rh3"></div>
+          <div class="religion-heat rh4"></div>
+          <div class="attack-arrow aa1">⟶</div>
+          <div class="attack-arrow aa2">⟶</div>
+          <div class="tension-border tb1"></div>
+        </div>
+      </div>
+      <div class="top-hud">
+        <div class="hud-left">
+          <div class="speed-pill">2×</div>
+        </div>
+        <div class="hud-center">
+          <div class="year-label">1743</div>
+          <div class="era-label">Enlightenment</div>
+        </div>
+        <div class="hud-right">
+          <div class="energy-pill">⚡ 14</div>
+        </div>
+      </div>
+      <div class="fab" id="fabB">✦</div>
+      <!-- FAB radial (shown in overlay toggle state) -->
+      <div class="fab-radial state-overlay" id="radialB">
+        <div class="radial-btn rb-blessing rb1">🌾</div>
+        <div class="radial-btn rb-blessing rb2">💡</div>
+        <div class="radial-btn rb-blessing rb3">✨</div>
+        <div class="radial-btn rb-disaster rb4">🌊</div>
+        <div class="radial-btn rb-disaster rb5">⚡</div>
+        <div class="radial-btn rb-eye rb-center">👁</div>
+      </div>
+      <div class="layer-picker">
+        <div class="layer-btn active-layer">Religion</div>
+        <div class="layer-btn">Military</div>
+        <div class="layer-btn">Trade</div>
+        <div class="layer-btn">Science</div>
+      </div>
+      <div class="callout state-overlay" style="bottom: 140px; right: 90px;">
+        <div class="callout-box">Eye in center of radial ↘</div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+    <div class="tap-hint">Tap phone to see radial + overlay</div>
+    <div class="analysis">
+      <ul>
+        <li class="pro">Keeps HUD clean — no extra button</li>
+        <li class="pro">Thematic: divine sight from the divine power menu</li>
+        <li class="con">Hidden behind 2 taps (FAB → eye)</li>
+        <li class="con">Less discoverable — new players won't find it</li>
+        <li class="con">Conflicts with power casting flow</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- OPTION C: Long-Press Map -->
+  <div class="option-wrapper">
+    <div class="option-label">Option C: Long-Press Map</div>
+    <div class="option-desc">Long-press any empty map area to toggle overlay on/off. No button needed — pure gesture.</div>
+    <div class="phone" id="phoneC" onclick="toggleOverlay('phoneC')">
+      <div class="notch"></div>
+      <div class="map">
+        <div class="map-ocean"></div>
+        <div class="map-ocean2"></div>
+        <div class="map-region r1"></div>
+        <div class="map-region r2"></div>
+        <div class="map-region r3"></div>
+        <div class="map-region r4"></div>
+        <div class="map-region r5"></div>
+        <div class="map-region r6"></div>
+        <div class="trade-route tr1"></div>
+        <div class="trade-route tr2"></div>
+        <div class="city-dot cd1"></div>
+        <div class="city-dot cd2"></div>
+        <div class="city-dot cd3"></div>
+        <div class="city-dot cd4"></div>
+        <div class="city-dot cd5"></div>
+        <div class="overlay-layer">
+          <div class="religion-heat rh1"></div>
+          <div class="religion-heat rh2"></div>
+          <div class="religion-heat rh3"></div>
+          <div class="religion-heat rh4"></div>
+          <div class="attack-arrow aa1">⟶</div>
+          <div class="attack-arrow aa2">⟶</div>
+          <div class="tension-border tb1"></div>
+        </div>
+      </div>
+      <div class="top-hud">
+        <div class="hud-left">
+          <div class="speed-pill">2×</div>
+        </div>
+        <div class="hud-center">
+          <div class="year-label">1743</div>
+          <div class="era-label">Enlightenment</div>
+        </div>
+        <div class="hud-right">
+          <div class="energy-pill">⚡ 14</div>
+        </div>
+      </div>
+      <div class="fab">✦</div>
+      <!-- Long-press indicator -->
+      <div class="longpress-indicator state-overlay" style="display:none;" id="lpC">
+        <div class="lp-ripple"></div>
+        <div class="lp-label">Long-press to toggle</div>
+      </div>
+      <div class="layer-picker">
+        <div class="layer-btn active-layer">Religion</div>
+        <div class="layer-btn">Military</div>
+        <div class="layer-btn">Trade</div>
+        <div class="layer-btn">Science</div>
+      </div>
+      <div class="callout" style="top: 480px; left: 50%; transform: translateX(-50%);">
+        <div class="callout-box">Long-press empty map = toggle overlay</div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+    <div class="tap-hint">Tap phone to toggle overlay</div>
+    <div class="analysis">
+      <ul>
+        <li class="pro">Zero UI footprint — no buttons at all</li>
+        <li class="pro">"Reveal the hidden" gesture feels thematic</li>
+        <li class="con">Hard to discover without tutorial</li>
+        <li class="con">Conflicts with region tap/map gestures</li>
+        <li class="con">Accessibility: holding is difficult for some users</li>
+        <li class="con">Ambiguous: what's "empty" map vs. a region?</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- OPTION D: Dedicated + FAB Shortcut -->
+  <div class="option-wrapper">
+    <div class="option-label">Option D: Dual Entry (HUD + FAB)</div>
+    <div class="option-desc">Eye icon always in top bar AND available inside FAB radial. Two paths to the same toggle — browse or mid-cast.</div>
+    <div class="phone" id="phoneD" onclick="toggleOverlay('phoneD')">
+      <div class="notch"></div>
+      <div class="map">
+        <div class="map-ocean"></div>
+        <div class="map-ocean2"></div>
+        <div class="map-region r1"></div>
+        <div class="map-region r2"></div>
+        <div class="map-region r3"></div>
+        <div class="map-region r4"></div>
+        <div class="map-region r5"></div>
+        <div class="map-region r6"></div>
+        <div class="trade-route tr1"></div>
+        <div class="trade-route tr2"></div>
+        <div class="city-dot cd1"></div>
+        <div class="city-dot cd2"></div>
+        <div class="city-dot cd3"></div>
+        <div class="city-dot cd4"></div>
+        <div class="city-dot cd5"></div>
+        <div class="overlay-layer">
+          <div class="religion-heat rh1"></div>
+          <div class="religion-heat rh2"></div>
+          <div class="religion-heat rh3"></div>
+          <div class="religion-heat rh4"></div>
+          <div class="attack-arrow aa1">⟶</div>
+          <div class="attack-arrow aa2">⟶</div>
+          <div class="tension-border tb1"></div>
+        </div>
+      </div>
+      <div class="top-hud">
+        <div class="hud-left">
+          <div class="speed-pill">2×</div>
+        </div>
+        <div class="hud-center">
+          <div class="year-label">1743</div>
+          <div class="era-label">Enlightenment</div>
+        </div>
+        <div class="hud-right">
+          <div class="energy-pill">⚡ 14</div>
+          <div class="eye-btn" id="eyeD">👁</div>
+        </div>
+      </div>
+      <div class="fab" id="fabD">✦</div>
+      <div class="fab-radial state-overlay" id="radialD">
+        <div class="radial-btn rb-blessing rb1">🌾</div>
+        <div class="radial-btn rb-blessing rb2">💡</div>
+        <div class="radial-btn rb-blessing rb3">✨</div>
+        <div class="radial-btn rb-disaster rb4">🌊</div>
+        <div class="radial-btn rb-disaster rb5">⚡</div>
+        <div class="radial-btn rb-eye rb-center">👁</div>
+      </div>
+      <div class="layer-picker">
+        <div class="layer-btn active-layer">Religion</div>
+        <div class="layer-btn">Military</div>
+        <div class="layer-btn">Trade</div>
+        <div class="layer-btn">Science</div>
+      </div>
+      <div class="callout" style="top: 30px; right: 60px;">
+        <div class="callout-box">← Eye in HUD (always visible)</div>
+      </div>
+      <div class="callout state-overlay" style="bottom: 140px; right: 90px;">
+        <div class="callout-box">Also in FAB radial ↘</div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+    <div class="tap-hint">Tap phone to toggle overlay</div>
+    <div class="analysis">
+      <ul>
+        <li class="pro">Maximum discoverability — always visible in HUD</li>
+        <li class="pro">Fast mid-cast access via FAB shortcut</li>
+        <li class="pro">Screen reader friendly (HUD button)</li>
+        <li class="pro">Veterans use FAB path, new players use HUD</li>
+        <li class="con">Slight redundancy — two buttons for one function</li>
+        <li class="con">Marginal added complexity</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<!-- Comparison Table -->
+<div class="comparison">
+  <h2>Comparison Matrix</h2>
+  <table>
+    <tr>
+      <th>Criterion</th>
+      <th>A: HUD Button</th>
+      <th>B: FAB Menu</th>
+      <th>C: Long-Press</th>
+      <th>D: Dual Entry</th>
+    </tr>
+    <tr>
+      <td>Discoverability</td>
+      <td><span class="score score-high">High</span></td>
+      <td><span class="score score-low">Low</span></td>
+      <td><span class="score score-low">Low</span></td>
+      <td><span class="score score-high">High</span></td>
+    </tr>
+    <tr>
+      <td>Taps to Activate</td>
+      <td>1 tap</td>
+      <td>2 taps</td>
+      <td>1 hold</td>
+      <td>1 tap (HUD) or 2 (FAB)</td>
+    </tr>
+    <tr>
+      <td>HUD Space Used</td>
+      <td>36pt icon</td>
+      <td>None</td>
+      <td>None</td>
+      <td>36pt icon</td>
+    </tr>
+    <tr>
+      <td>Accessibility</td>
+      <td><span class="score score-high">Good</span></td>
+      <td><span class="score score-mid">OK</span></td>
+      <td><span class="score score-low">Poor</span></td>
+      <td><span class="score score-high">Good</span></td>
+    </tr>
+    <tr>
+      <td>Mid-Cast Access</td>
+      <td>Must close FAB first</td>
+      <td><span class="score score-high">Yes — in same menu</span></td>
+      <td>Must close FAB first</td>
+      <td><span class="score score-high">Yes — in same menu</span></td>
+    </tr>
+    <tr>
+      <td>Gesture Conflicts</td>
+      <td>None</td>
+      <td>Mild (FAB flow)</td>
+      <td><span class="score score-low">High (region tap)</span></td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>Implementation Cost</td>
+      <td><span class="score score-high">Low</span></td>
+      <td><span class="score score-mid">Medium</span></td>
+      <td><span class="score score-mid">Medium</span></td>
+      <td><span class="score score-mid">Medium</span></td>
+    </tr>
+  </table>
+</div>
+
+<script>
+function toggleOverlay(phoneId) {
+  const phone = document.getElementById(phoneId);
+  phone.classList.toggle('overlay-active');
+
+  if (phoneId === 'phoneA') {
+    document.getElementById('eyeA').classList.toggle('active-eye');
+  }
+  if (phoneId === 'phoneB') {
+    const radial = document.getElementById('radialB');
+    if (phone.classList.contains('overlay-active')) {
+      radial.style.display = 'block';
+    } else {
+      radial.style.display = 'none';
+    }
+  }
+  if (phoneId === 'phoneC') {
+    const lp = document.getElementById('lpC');
+    if (phone.classList.contains('overlay-active')) {
+      lp.style.display = 'block';
+    } else {
+      lp.style.display = 'none';
+    }
+  }
+  if (phoneId === 'phoneD') {
+    document.getElementById('eyeD').classList.toggle('active-eye');
+    const radial = document.getElementById('radialD');
+    if (phone.classList.contains('overlay-active')) {
+      radial.style.display = 'block';
+    } else {
+      radial.style.display = 'none';
+    }
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+---
+description: How to navigate and update the DIVINE DOMINION game design. Covers doc structure, change procedures, and authority hierarchy.
+alwaysApply: true
+---
+
+# DIVINE DOMINION — Design Change Protocol
+
+## Start here
+Read `docs/INDEX.md` for navigation. It has the glossary and three routing tables (design, implementation, code).
+
+## Authority hierarchy (who owns what)
+1. **`src/types/game.ts`** — Authoritative source for all type shapes. Design docs reference it, never duplicate it.
+2. **`docs/design/*.md`** — Authoritative source for game design (rules, tables, constants, narrative). Single source of truth.
+3. **`src/simulation/__tests__/*.test.ts`** — Authoritative source for exact behavioral expectations. Tests are the spec.
+4. **`docs/design/constants.md`** + **`src/config/constants.ts`** — Must stay in sync. Both are authoritative for numerical values.
+5. **`docs/implementation/*.md`** — Authoritative source for build tasks. Must reflect current design at all times.
+
+## When making a design change — FULL SYNC CHECKLIST
+
+Every design change must sweep ALL of these. Do not skip any step. Check each one and either update it or confirm "no change needed."
+
+1. **Design doc** — Edit the relevant `docs/design/*.md` file (use routing table in `docs/INDEX.md`)
+2. **Types** — If new interfaces, fields, or enums → update `src/types/game.ts`
+3. **Constants** — If numerical values changed → update BOTH `docs/design/constants.md` AND `src/config/constants.ts`
+4. **Tests** — If behavior changed → update the relevant `src/simulation/__tests__/*.test.ts`
+5. **Glossary** — If new concepts added → update the glossary table in `docs/INDEX.md`
+6. **Implementation phases** — If the change adds, removes, or modifies any buildable task:
+   - Update the relevant `docs/implementation/phase-*.md` file(s)
+   - Update `docs/implementation/OVERVIEW.md` (phase summary table, expected test counts)
+   - Update the IMPLEMENTATION routing table in `docs/INDEX.md` (task ranges)
+   - Update the CODE routing table in `docs/INDEX.md` (new modules / test files)
+7. **Cross-references** — Update the cross-reference line at the top of every design doc that now connects to new docs
+8. **DESIGN routing table** — If a design doc's scope or line count changed significantly → update its row in `docs/INDEX.md`
+9. **This rule file** — If the protocol itself needs updating → edit this file
+
+**Step 6 is NOT optional.** Design changes almost always affect implementation. If you changed what gets built, you MUST update how it gets built. The implementation docs are not a separate project — they are part of the same sync chain as types, constants, and tests.
+
+## Rules
+- Never duplicate TypeScript interfaces in design docs — reference `src/types/game.ts` instead
+- Design docs explain *what and why*. Types define *exact shape*. Tests define *exact behavior*. Implementation docs define *exact build steps*.
+- Every design doc has cross-references at the top — update them if you add new connections
+- Keep each design doc under 300 lines. If it grows beyond that, split it.
+- When in doubt about whether a file needs updating: it does. Check it.

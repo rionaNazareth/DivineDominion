@@ -1,0 +1,22 @@
+{
+  "root": true,
+  "env": {
+    "es2022": true,
+    "node": true
+  },
+  "overrides": [
+    {
+      "files": ["src/simulation/**/*.ts"],
+      "rules": {
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "MemberExpression[object.name='Math'][property.name='random']",
+            "message": "Use src/simulation/prng.ts for all randomness in simulation code. Math.random is non-deterministic."
+          }
+        ]
+      }
+    }
+  ]
+}
+

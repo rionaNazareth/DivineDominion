@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Village: Round hut + smoke wisp -->
+  <defs>
+    <radialGradient id="hut-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8a6a38"/>
+      <stop offset="100%" stop-color="#6a5a40"/>
+    </radialGradient>
+    <filter id="campfire-glow">
+      <feGaussianBlur stdDeviation="1"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <!-- Round thatched hut body -->
+  <ellipse cx="32" cy="42" rx="18" ry="14" fill="#6a5a40" stroke="#a08048" stroke-width="1.5"/>
+  <!-- Thatch roof (dome) -->
+  <path d="M14 42 Q32 22 50 42" fill="#8a6a38" stroke="#a08048" stroke-width="1.5"/>
+  <!-- Smoke wisp -->
+  <path d="M32 18 Q28 12 32 8 Q36 4 34 2" fill="none" stroke="#a0a090" stroke-width="1.5" stroke-linecap="round" opacity="0.9"/>
+  <!-- Campfire glow dot -->
+  <circle cx="32" cy="48" r="2" fill="#e8a030" filter="url(#campfire-glow)" opacity="0.95"/>
+  <circle cx="32" cy="48" r="1" fill="#ffcc66"/>
+</svg>

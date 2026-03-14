@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Future City: Needle spire + orbital ring halo -->
+  <defs>
+    <linearGradient id="spire-grad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#252540"/>
+      <stop offset="100%" stop-color="#151530"/>
+    </linearGradient>
+  </defs>
+  <!-- Orbital ring (ellipse, stroke only, cyan) -->
+  <ellipse cx="32" cy="32" rx="28" ry="12" fill="none" stroke="#00CED1" stroke-width="1.5" opacity="0.5"/>
+  <!-- Left flank support structure -->
+  <rect x="8" y="48" width="10" height="16" fill="#151530" stroke="#6a5acd" stroke-width="1.5"/>
+  <!-- Right flank support structure -->
+  <rect x="46" y="48" width="10" height="16" fill="#151530" stroke="#6a5acd" stroke-width="1.5"/>
+  <!-- Energy beam lines: left flank to spire -->
+  <line x1="13" y1="48" x2="28" y2="20" stroke="#00CED1" stroke-width="1" opacity="0.6"/>
+  <line x1="18" y1="48" x2="32" y2="24" stroke="#00CED1" stroke-width="1" opacity="0.5"/>
+  <!-- Energy beam lines: right flank to spire -->
+  <line x1="51" y1="48" x2="36" y2="20" stroke="#00CED1" stroke-width="1" opacity="0.6"/>
+  <line x1="46" y1="48" x2="32" y2="24" stroke="#00CED1" stroke-width="1" opacity="0.5"/>
+  <!-- Central needle spire (dominant vertical) -->
+  <path d="M28 64 L32 8 L36 64 Z" fill="url(#spire-grad)" stroke="#6a5acd" stroke-width="1.5"/>
+  <!-- Pointed top with cyan beacon -->
+  <circle cx="32" cy="8" r="3" fill="#00CED1" stroke="#40E0D0" stroke-width="1"/>
+  <!-- Cyan windows on spire -->
+  <rect x="30" y="28" width="2" height="4" fill="#00CED1" opacity="0.9"/>
+  <rect x="30" y="38" width="2" height="4" fill="#00CED1" opacity="0.9"/>
+  <rect x="30" y="48" width="2" height="4" fill="#00CED1" opacity="0.9"/>
+  <!-- Cyan windows on flanks -->
+  <rect x="10" y="52" width="2" height="3" fill="#00CED1" opacity="0.8"/>
+  <rect x="48" y="52" width="2" height="3" fill="#00CED1" opacity="0.8"/>
+</svg>

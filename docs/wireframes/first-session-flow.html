@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIVINE DOMINION — First Session Flow Prototype</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #0a0a0a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    color: #e0e0e0;
+  }
+
+  .meta-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(20,20,20,0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #333;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+    font-size: 13px;
+  }
+  .meta-bar .step-label { color: #d4a857; font-weight: 600; }
+  .meta-bar .step-count { color: #777; }
+  .meta-bar .nav-btns { display: flex; gap: 8px; }
+  .meta-bar button {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid #444;
+    color: #ccc;
+    padding: 6px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .meta-bar button:hover { background: rgba(255,255,255,0.15); }
+  .meta-bar button:disabled { opacity: 0.3; cursor: default; }
+  .meta-bar .design-note {
+    color: #888;
+    font-size: 11px;
+    max-width: 400px;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .phone-frame {
+    margin-top: 70px;
+    width: 375px;
+    height: 812px;
+    background: #1a1a2e;
+    border-radius: 44px;
+    border: 3px solid #333;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.6);
+    margin-bottom: 40px;
+  }
+  .notch {
+    width: 150px; height: 28px;
+    background: #0a0a0a;
+    border-radius: 0 0 18px 18px;
+    margin: 0 auto;
+    position: relative; z-index: 10;
+  }
+  .status-bar {
+    display: flex; justify-content: space-between;
+    padding: 4px 24px 0; font-size: 11px; color: #555;
+    position: absolute; top: 0; left: 0; right: 0; height: 28px; align-items: center;
+  }
+  .home-indicator {
+    width: 134px; height: 4px; background: #444; border-radius: 2px;
+    position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+  }
+
+  .screen {
+    display: none;
+    width: 100%; height: calc(100% - 28px);
+    position: relative; overflow: hidden;
+  }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* Shared */
+  .center-content {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 24px; text-align: center;
+  }
+  .gold { color: #d4a857; }
+  .muted { color: #666; }
+  .small { font-size: 12px; }
+  .action-btn {
+    background: #d4a857; color: #1a1a2e; border: none;
+    border-radius: 14px; padding: 14px 32px; font-size: 16px;
+    font-weight: 700; cursor: pointer; width: 100%; max-width: 320px;
+    margin-top: 16px;
+  }
+  .action-btn:hover { background: #e0b96a; }
+  .action-btn.outline {
+    background: transparent; border: 1.5px solid #d4a857;
+    color: #d4a857;
+  }
+  .fade-in { animation: fadeIn 0.8s ease-out; }
+  .fade-in-slow { animation: fadeIn 2s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 15px rgba(212,168,87,0.3); }
+    50% { box-shadow: 0 0 30px rgba(212,168,87,0.6); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  /* === SCREEN 1: Void === */
+  .void-screen { background: #000; }
+  .void-text {
+    font-size: 24px; color: #999; font-style: italic;
+    animation: fadeIn 3s ease-out;
+  }
+
+  /* === SCREEN 2: Earth Appears === */
+  .earth-screen { background: #050510; }
+  .earth-globe {
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 40% 40%, #2a5a3a, #1a3a2a 50%, #0d1f15 80%, #050510);
+    box-shadow: 0 0 60px rgba(42,90,58,0.3), inset -20px -10px 40px rgba(0,0,0,0.5);
+    margin-bottom: 32px;
+    animation: fadeIn 2s ease-out, float 6s ease-in-out infinite;
+  }
+  .earth-text {
+    font-size: 18px; color: #888;
+    animation: fadeIn 3s ease-out 1s both;
+  }
+
+  /* === SCREEN 3: Main Menu === */
+  .menu-screen { background: #0d0d1a; }
+  .menu-earth {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: radial-gradient(ellipse at 40% 40%, #2a5a3a, #1a3a2a 50%, #0d1f15);
+    box-shadow: 0 0 40px rgba(42,90,58,0.2);
+    margin-bottom: 16px; animation: float 8s ease-in-out infinite;
+  }
+  .menu-title {
+    font-size: 26px; font-weight: 700; color: #d4a857;
+    letter-spacing: 3px; margin-bottom: 4px;
+  }
+  .menu-subtitle {
+    font-size: 11px; color: #666; letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: 40px;
+  }
+  .menu-btn-group { width: 100%; max-width: 280px; display: flex; flex-direction: column; gap: 12px; }
+  .menu-btn {
+    padding: 14px; border-radius: 12px; font-size: 15px;
+    font-weight: 600; cursor: pointer; text-align: center;
+  }
+  .menu-btn.primary { background: #d4a857; color: #1a1a2e; border: none; }
+  .menu-btn.secondary { background: transparent; border: 1px solid #444; color: #aaa; }
+  .menu-bottom { position: absolute; bottom: 44px; font-size: 10px; color: #444; }
+  .menu-gear {
+    position: absolute; top: 12px; right: 20px;
+    width: 44px; height: 44px; display: flex;
+    align-items: center; justify-content: center;
+    font-size: 20px; color: #555; cursor: pointer;
+  }
+
+  /* === SCREEN 4: Archetype Selection === */
+  .archetype-screen {
+    background: #0d0d1a;
+    padding: 16px;
+  }
+  .arch-header {
+    text-align: center; margin-bottom: 16px;
+  }
+  .arch-header h2 { font-size: 20px; color: #d4a857; margin-bottom: 4px; }
+  .arch-header p { font-size: 12px; color: #777; }
+  .arch-cards {
+    flex: 1; overflow-y: auto; display: flex;
+    flex-direction: column; gap: 12px; padding-bottom: 20px;
+  }
+  .arch-cards::-webkit-scrollbar { width: 0; }
+  .arch-card {
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 16px; padding: 20px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .arch-card:hover { border-color: rgba(212,168,87,0.4); }
+  .arch-card.selected { border-color: #d4a857; background: rgba(212,168,87,0.06); }
+  .arch-card .arch-icon { font-size: 28px; margin-bottom: 8px; }
+  .arch-card .arch-name {
+    font-size: 18px; font-weight: 700; color: #e0e0e0; margin-bottom: 2px;
+  }
+  .arch-card .arch-philosophy {
+    font-size: 12px; color: #999; font-style: italic; margin-bottom: 12px;
+  }
+  .arch-cmd {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; color: #888; padding: 4px 0;
+  }
+  .arch-cmd .dot {
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  }
+  .arch-card.shepherd .arch-name { color: #e8c170; }
+  .arch-card.shepherd .dot { background: #e8c170; }
+  .arch-card.judge .arch-name { color: #a0b8d0; }
+  .arch-card.judge .dot { background: #a0b8d0; }
+  .arch-card.conqueror .arch-name { color: #d48a8a; }
+  .arch-card.conqueror .dot { background: #d48a8a; }
+
+  /* === SCREEN 5: Commandment Review === */
+  .cmd-review-screen {
+    background: #0d0d1a; padding: 16px;
+  }
+  .cmd-review-header { text-align: center; margin-bottom: 12px; }
+  .cmd-review-header h2 { font-size: 18px; color: #d4a857; margin-bottom: 4px; }
+  .cmd-review-header p { font-size: 11px; color: #777; }
+  .cmd-counter {
+    display: inline-block; background: rgba(212,168,87,0.15);
+    border: 1px solid rgba(212,168,87,0.3); border-radius: 14px;
+    padding: 3px 12px; font-size: 12px; color: #d4a857; margin-top: 6px;
+  }
+  .cmd-grid {
+    flex: 1; display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; overflow-y: auto; padding-bottom: 70px;
+    align-content: start;
+  }
+  .cmd-grid::-webkit-scrollbar { width: 0; }
+  .cmd-card {
+    background: rgba(212,168,87,0.06);
+    border: 1px solid rgba(212,168,87,0.25);
+    border-radius: 10px; padding: 10px; position: relative;
+  }
+  .cmd-card .cmd-check {
+    position: absolute; top: 6px; right: 6px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #d4a857; display: flex; align-items: center;
+    justify-content: center; font-size: 10px; color: #1a1a2e;
+  }
+  .cmd-card .cmd-cat {
+    width: 6px; height: 6px; border-radius: 50%;
+    display: inline-block; margin-right: 4px;
+  }
+  .cmd-card .cmd-name { font-size: 11px; font-weight: 600; color: #e0e0e0; margin-bottom: 3px; }
+  .cmd-card .cmd-effect { font-size: 9px; color: #888; line-height: 1.3; }
+  .cmd-bottom-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, #0d0d1a 30%);
+    padding: 30px 16px 34px; text-align: center;
+  }
+
+  /* === SCREEN 6: World Gen Loading === */
+  .worldgen-screen { background: #050510; }
+  .worldgen-globe {
+    width: 160px; height: 160px; border-radius: 50%;
+    background: radial-gradient(ellipse at 40% 40%, #2a5a3a, #1a3a2a 50%, #0d1f15);
+    box-shadow: 0 0 50px rgba(42,90,58,0.3);
+    margin-bottom: 32px;
+    animation: float 3s ease-in-out infinite;
+  }
+  .worldgen-text {
+    font-size: 14px; color: #888; margin-bottom: 16px;
+    animation: fadeIn 1s ease-out;
+  }
+  .progress-bar {
+    width: 200px; height: 3px; background: rgba(255,255,255,0.1);
+    border-radius: 2px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; width: 65%; background: #d4a857;
+    border-radius: 2px;
+    animation: progressAnim 3s ease-in-out infinite;
+  }
+  @keyframes progressAnim {
+    0% { width: 20%; } 50% { width: 80%; } 100% { width: 95%; }
+  }
+
+  /* === SCREEN 7-11: Game Screens === */
+  .game-screen {
+    background: #1a2a1a; position: relative;
+  }
+  .map-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 30% 40%, #2a4a2a 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 60%, #2a3a2a 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 80%, #1a3a3a 0%, transparent 50%),
+      linear-gradient(135deg, #141e14, #1a2a1a, #0d1a1a);
+  }
+  .map-regions {
+    position: absolute; inset: 0;
+  }
+  .region {
+    position: absolute; border-radius: 40%;
+    opacity: 0.3; border: 1px solid rgba(255,255,255,0.05);
+  }
+  .region.player {
+    background: rgba(212,168,87,0.2);
+    border-color: rgba(212,168,87,0.3);
+    opacity: 0.6;
+    animation: pulseGlow 3s ease-in-out infinite;
+  }
+  .region.neutral { background: rgba(100,120,140,0.15); }
+  .region.rival { background: rgba(140,80,80,0.15); }
+
+  .game-hud-top {
+    position: absolute; top: 32px; left: 12px; right: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 5;
+  }
+  .hud-left { display: flex; gap: 12px; align-items: center; }
+  .hud-speed {
+    background: rgba(0,0,0,0.5); border-radius: 8px;
+    padding: 4px 10px; font-size: 11px; color: #aaa;
+  }
+  .hud-year {
+    background: rgba(0,0,0,0.5); border-radius: 8px;
+    padding: 4px 10px; font-size: 12px; color: #d4a857; font-weight: 600;
+  }
+  .hud-energy {
+    background: rgba(0,0,0,0.5); border-radius: 8px;
+    padding: 4px 10px; font-size: 11px; color: #e8c170;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .energy-bar {
+    width: 40px; height: 4px; background: rgba(255,255,255,0.15);
+    border-radius: 2px; overflow: hidden;
+  }
+  .energy-fill { height: 100%; background: #e8c170; border-radius: 2px; }
+
+  .fab {
+    position: absolute; bottom: 50px; right: 20px;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: linear-gradient(135deg, #d4a857, #c49840);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: #1a1a2e; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(212,168,87,0.4);
+    z-index: 5;
+  }
+  .fab.pulsing { animation: pulseGlow 1.5s ease-in-out infinite; }
+
+  /* Tutorial overlay */
+  .tutorial-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 20; display: flex;
+    flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .tutorial-spotlight {
+    width: 120px; height: 80px;
+    border: 2px solid #d4a857;
+    border-radius: 12px;
+    box-shadow: 0 0 0 2000px rgba(0,0,0,0.6);
+    position: relative;
+    margin-bottom: 16px;
+  }
+  .tutorial-tooltip {
+    background: #1a1a2e;
+    border: 1px solid #d4a857;
+    border-radius: 12px;
+    padding: 14px 18px;
+    max-width: 280px;
+    text-align: center;
+    position: relative;
+  }
+  .tutorial-tooltip::before {
+    content: ''; position: absolute; top: -8px; left: 50%;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #d4a857;
+  }
+  .tutorial-tooltip p { font-size: 13px; color: #e0e0e0; line-height: 1.4; margin-bottom: 10px; }
+  .tutorial-tooltip .got-it {
+    background: none; border: 1px solid #d4a857;
+    color: #d4a857; padding: 6px 20px; border-radius: 8px;
+    font-size: 12px; cursor: pointer;
+  }
+
+  /* Blessing VFX */
+  .blessing-vfx {
+    position: absolute;
+    width: 140px; height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(212,168,87,0.4), transparent 70%);
+    animation: blessingPulse 2s ease-out infinite;
+    z-index: 4;
+  }
+  @keyframes blessingPulse {
+    0% { transform: scale(0.8); opacity: 0.8; }
+    50% { transform: scale(1.2); opacity: 0.4; }
+    100% { transform: scale(0.8); opacity: 0.8; }
+  }
+  .wheat-lines {
+    position: absolute;
+    font-size: 20px; opacity: 0.6;
+    animation: float 2s ease-in-out infinite;
+  }
+
+  /* Power radial menu */
+  .radial-menu {
+    position: absolute; bottom: 40px; right: 10px;
+    width: 200px; height: 200px; z-index: 15;
+  }
+  .radial-item {
+    position: absolute; width: 48px; height: 48px;
+    border-radius: 50%;
+    background: rgba(26,26,46,0.9);
+    border: 1.5px solid rgba(212,168,87,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; cursor: pointer;
+  }
+  .radial-item:hover { border-color: #d4a857; background: rgba(212,168,87,0.15); }
+  .radial-label {
+    position: absolute; font-size: 9px; color: #aaa;
+    white-space: nowrap;
+  }
+
+  /* Event toast */
+  .event-toast {
+    position: absolute; top: 70px; left: 16px; right: 16px;
+    background: rgba(26,26,46,0.95);
+    border: 1px solid rgba(212,168,87,0.3);
+    border-radius: 12px; padding: 12px 16px;
+    z-index: 10; cursor: pointer;
+    animation: slideDown 0.3s ease-out;
+  }
+  @keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .event-toast .toast-title { font-size: 13px; font-weight: 600; color: #e0e0e0; margin-bottom: 2px; }
+  .event-toast .toast-sub { font-size: 11px; color: #888; }
+  .event-toast .toast-action { font-size: 10px; color: #d4a857; margin-top: 4px; }
+
+  /* Event card full */
+  .event-card-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 25; display: flex;
+    align-items: center; justify-content: center;
+  }
+  .event-card {
+    width: 320px;
+    background: #1a1a2e;
+    border: 1px solid rgba(212,168,87,0.3);
+    border-radius: 20px; padding: 24px;
+    text-align: center;
+  }
+  .event-card .event-era { font-size: 10px; color: #d4a857; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .event-card .event-title { font-size: 20px; font-weight: 700; color: #e0e0e0; margin-bottom: 8px; }
+  .event-card .event-desc { font-size: 13px; color: #999; line-height: 1.5; margin-bottom: 20px; }
+  .event-choice {
+    width: 100%; padding: 12px; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: #e0e0e0; font-size: 13px; cursor: pointer;
+    margin-bottom: 8px; text-align: left;
+  }
+  .event-choice:hover { border-color: rgba(212,168,87,0.4); background: rgba(212,168,87,0.06); }
+  .event-choice .choice-effect { font-size: 10px; color: #888; margin-top: 2px; }
+
+  /* Era summary */
+  .era-summary-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 25; display: flex;
+    align-items: center; justify-content: center;
+  }
+  .era-summary {
+    width: 320px; background: #1a1a2e;
+    border: 1px solid rgba(212,168,87,0.3);
+    border-radius: 20px; padding: 24px; text-align: center;
+  }
+  .era-summary .era-badge {
+    font-size: 10px; color: #d4a857; text-transform: uppercase;
+    letter-spacing: 1.5px; margin-bottom: 6px;
+  }
+  .era-summary .era-name { font-size: 22px; font-weight: 700; color: #e0e0e0; margin-bottom: 4px; }
+  .era-summary .era-years { font-size: 13px; color: #777; margin-bottom: 16px; }
+  .era-stat-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;
+  }
+  .era-stat {
+    background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px;
+  }
+  .era-stat .stat-value { font-size: 18px; font-weight: 700; color: #d4a857; }
+  .era-stat .stat-label { font-size: 10px; color: #888; margin-top: 2px; }
+  .era-next-hint {
+    font-size: 12px; color: #777; font-style: italic; margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="meta-bar">
+  <div>
+    <span class="step-label" id="stepLabel">Step 1: The Void</span>
+    <span class="step-count" id="stepCount"> — 1 / 11</span>
+  </div>
+  <div class="design-note" id="designNote">Player sees darkness. Ambient hum. Sets the tone: you are a god awakening.</div>
+  <div class="nav-btns">
+    <button id="prevBtn" onclick="prevStep()" disabled>← Back</button>
+    <button id="nextBtn" onclick="nextStep()">Next →</button>
+  </div>
+</div>
+
+<div class="phone-frame">
+  <div class="status-bar"><span>9:41</span><span>87%</span></div>
+  <div class="notch"></div>
+
+  <!-- SCREEN 1: Void -->
+  <div class="screen active" id="screen1">
+    <div class="center-content" style="background:#000;">
+      <div class="void-text">"You have arrived."</div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: Earth Appears -->
+  <div class="screen" id="screen2">
+    <div class="center-content earth-screen">
+      <div class="earth-globe"></div>
+      <div class="earth-text">"This is your Earth. It needs a God."</div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: Main Menu -->
+  <div class="screen" id="screen3">
+    <div class="center-content menu-screen">
+      <div class="menu-gear">⚙</div>
+      <div class="menu-earth"></div>
+      <div class="menu-title">DIVINE DOMINION</div>
+      <div class="menu-subtitle">Infinite Earths Await</div>
+      <div class="menu-btn-group">
+        <div class="menu-btn primary" onclick="nextStep()">Create New Earth</div>
+        <div class="menu-btn secondary">Earth History</div>
+        <div class="menu-btn secondary">Store</div>
+      </div>
+      <div class="menu-bottom">v1.0.0</div>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: Archetype Selection -->
+  <div class="screen" id="screen4">
+    <div class="archetype-screen" style="display:flex;flex-direction:column;height:100%;">
+      <div class="arch-header">
+        <h2>Choose Your Path</h2>
+        <p>Each path shapes your starting commandments</p>
+      </div>
+      <div class="arch-cards">
+        <div class="arch-card shepherd" onclick="this.classList.toggle('selected'); document.querySelectorAll('.arch-card').forEach(c => { if(c!==this) c.classList.remove('selected'); });">
+          <div class="arch-icon">🕊</div>
+          <div class="arch-name">The Shepherd</div>
+          <div class="arch-philosophy">"Guide through compassion and wisdom."</div>
+          <div class="arch-cmd"><div class="dot"></div> Turn the Other Cheek</div>
+          <div class="arch-cmd"><div class="dot"></div> Teach Every Child</div>
+          <div class="arch-cmd"><div class="dot"></div> All Life is Sacred</div>
+        </div>
+        <div class="arch-card judge" onclick="this.classList.toggle('selected'); document.querySelectorAll('.arch-card').forEach(c => { if(c!==this) c.classList.remove('selected'); });">
+          <div class="arch-icon">⚖</div>
+          <div class="arch-name">The Judge</div>
+          <div class="arch-philosophy">"Rule through order and justice."</div>
+          <div class="arch-cmd"><div class="dot"></div> Justice is Absolute</div>
+          <div class="arch-cmd"><div class="dot"></div> Discipline Above All</div>
+          <div class="arch-cmd"><div class="dot"></div> Sacred Knowledge</div>
+        </div>
+        <div class="arch-card conqueror" onclick="this.classList.toggle('selected'); document.querySelectorAll('.arch-card').forEach(c => { if(c!==this) c.classList.remove('selected'); });">
+          <div class="arch-icon">⚔</div>
+          <div class="arch-name">The Conqueror</div>
+          <div class="arch-philosophy">"Expand through strength and glory."</div>
+          <div class="arch-cmd"><div class="dot"></div> Holy Conquest</div>
+          <div class="arch-cmd"><div class="dot"></div> Smite the Wicked</div>
+          <div class="arch-cmd"><div class="dot"></div> Dominion Over Nature</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 5: Commandment Review (Grid) -->
+  <div class="screen" id="screen5">
+    <div class="cmd-review-screen" style="display:flex;flex-direction:column;height:100%;">
+      <div class="cmd-review-header">
+        <h2>Your Commandments</h2>
+        <p>Review and swap any that don't feel right</p>
+        <div class="cmd-counter">10 / 10 selected</div>
+      </div>
+      <div class="cmd-grid">
+        <div class="cmd-card"><div class="cmd-check">✓</div><div class="cmd-cat" style="background:#e8c170"></div><div class="cmd-name">Turn the Other Cheek</div><div class="cmd-effect">Can't declare wars; +20% sympathy</div></div>
+        <div class="cmd-card"><div class="cmd-check">✓</div><div class="cmd-cat" style="background:#81b29a"></div><div class="cmd-name">Teach Every Child</div><div class="cmd-effect">+20% research, +population</div></div>
+        <div class="cmd-card"><div class="cmd-check">✓</div><div class="cmd-cat" style="background:#d4a0a0"></div><div class="cmd-name">All Life is Sacred</div><div class="cmd-effect">No plague/famine; +25% diplomacy</div></div>
+        <div class="cmd-card"><div class="cmd-check">✓</div><div class="cmd-cat" style="background:#7eb5d6"></div><div class="cmd-name">Share All Wealth</div><div class="cmd-effect">+25% happiness, -10% economy</div></div>
+        <div class="cmd-card"><div class="cmd-check">✓</div><div class="cmd-cat" style="background:#c9a0dc"></div><div class="cmd-name">God is Silent</div><div class="cmd-effect">Powers cost less; followers independent</div></div>
+        <div class="cmd-card"><div class="cmd-check">✓</div><div class="cmd-cat" style="background:#e8c170"></div><div class="cmd-name">Harmony with Seasons</div><div class="cmd-effect">Slow growth; weather blessings cheaper</div></div>
+        <div class="cmd-card"><div class="cmd-check">✓</div><div class="cmd-cat" style="background:#81b29a"></div><div class="cmd-name">Seek Truth Above All</div><div class="cmd-effect">+30% research, +10% schism</div></div>
+        <div class="cmd-card"><div class="cmd-check">✓</div><div class="cmd-cat" style="background:#d4a0a0"></div><div class="cmd-name">Forgive and Redeem</div><div class="cmd-effect">2× integration speed</div></div>
+        <div class="cmd-card"><div class="cmd-check">✓</div><div class="cmd-cat" style="background:#e07a5f"></div><div class="cmd-name">Preach to All Lands</div><div class="cmd-effect">+25% missionary effectiveness</div></div>
+        <div class="cmd-card"><div class="cmd-check">✓</div><div class="cmd-cat" style="background:#7eb5d6"></div><div class="cmd-name">Celebrate Life</div><div class="cmd-effect">+20% population, +happiness</div></div>
+      </div>
+      <div class="cmd-bottom-bar">
+        <button class="action-btn" onclick="nextStep()">Confirm Laws</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 6: World Generation -->
+  <div class="screen" id="screen6">
+    <div class="center-content" style="background:#050510;">
+      <div class="worldgen-globe"></div>
+      <div class="worldgen-text" id="genText">Forming continents...</div>
+      <div class="progress-bar"><div class="progress-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 7: Tutorial 1 — Tap Region -->
+  <div class="screen game-screen" id="screen7">
+    <div class="map-bg"></div>
+    <div class="map-regions">
+      <div class="region neutral" style="top:15%;left:10%;width:25%;height:20%;"></div>
+      <div class="region neutral" style="top:10%;left:40%;width:30%;height:18%;"></div>
+      <div class="region rival" style="top:5%;right:5%;width:22%;height:22%;"></div>
+      <div class="region player" style="top:38%;left:22%;width:28%;height:22%;"></div>
+      <div class="region neutral" style="top:35%;right:10%;width:25%;height:20%;"></div>
+      <div class="region rival" style="top:62%;left:8%;width:22%;height:18%;"></div>
+      <div class="region neutral" style="top:60%;left:35%;width:30%;height:22%;"></div>
+      <div class="region neutral" style="top:65%;right:5%;width:20%;height:18%;"></div>
+    </div>
+    <div class="game-hud-top">
+      <div class="hud-left">
+        <div class="hud-speed">1×</div>
+        <div class="hud-year">1600 AD</div>
+      </div>
+      <div class="hud-energy">
+        ✦ 10
+        <div class="energy-bar"><div class="energy-fill" style="width:50%"></div></div>
+      </div>
+    </div>
+    <div class="fab">✦</div>
+    <div class="tutorial-overlay">
+      <div class="tutorial-spotlight" style="margin-top:80px;"></div>
+      <div class="tutorial-tooltip">
+        <p>These are your first followers. Tap to learn about them.</p>
+        <button class="got-it" onclick="nextStep()">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 8: Tutorial 3 — FAB Blessing -->
+  <div class="screen game-screen" id="screen8">
+    <div class="map-bg"></div>
+    <div class="map-regions">
+      <div class="region neutral" style="top:15%;left:10%;width:25%;height:20%;"></div>
+      <div class="region neutral" style="top:10%;left:40%;width:30%;height:18%;"></div>
+      <div class="region rival" style="top:5%;right:5%;width:22%;height:22%;"></div>
+      <div class="region player" style="top:38%;left:22%;width:28%;height:22%;"></div>
+      <div class="region neutral" style="top:35%;right:10%;width:25%;height:20%;"></div>
+      <div class="region rival" style="top:62%;left:8%;width:22%;height:18%;"></div>
+      <div class="region neutral" style="top:60%;left:35%;width:30%;height:22%;"></div>
+      <div class="region neutral" style="top:65%;right:5%;width:20%;height:18%;"></div>
+    </div>
+    <div class="game-hud-top">
+      <div class="hud-left">
+        <div class="hud-speed">1×</div>
+        <div class="hud-year">1600 AD</div>
+      </div>
+      <div class="hud-energy">✦ 10 <div class="energy-bar"><div class="energy-fill" style="width:50%"></div></div></div>
+    </div>
+    <div class="fab pulsing">✦</div>
+    <div class="tutorial-overlay" style="background:transparent;">
+      <div style="flex:1;"></div>
+      <div style="display:flex;align-items:flex-end;justify-content:flex-end;padding:0 20px 120px 0;width:100%;">
+        <div class="tutorial-tooltip" style="margin-right:20px;">
+          <p>This is your divine power. Tap to bless your followers.</p>
+          <button class="got-it" onclick="nextStep()">Got it</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 9: Blessing Cast (Harvest VFX) -->
+  <div class="screen game-screen" id="screen9">
+    <div class="map-bg"></div>
+    <div class="map-regions">
+      <div class="region neutral" style="top:15%;left:10%;width:25%;height:20%;"></div>
+      <div class="region neutral" style="top:10%;left:40%;width:30%;height:18%;"></div>
+      <div class="region rival" style="top:5%;right:5%;width:22%;height:22%;"></div>
+      <div class="region player" style="top:38%;left:22%;width:28%;height:22%;">
+        <div class="blessing-vfx" style="top:-10px;left:-10px;"></div>
+        <div class="wheat-lines" style="top:20%;left:20%;">🌾</div>
+        <div class="wheat-lines" style="top:40%;left:50%;animation-delay:0.5s;">🌾</div>
+        <div class="wheat-lines" style="top:60%;left:30%;animation-delay:1s;">🌾</div>
+      </div>
+      <div class="region neutral" style="top:35%;right:10%;width:25%;height:20%;"></div>
+      <div class="region rival" style="top:62%;left:8%;width:22%;height:18%;"></div>
+      <div class="region neutral" style="top:60%;left:35%;width:30%;height:22%;"></div>
+      <div class="region neutral" style="top:65%;right:5%;width:20%;height:18%;"></div>
+    </div>
+    <div class="game-hud-top">
+      <div class="hud-left">
+        <div class="hud-speed">1×</div>
+        <div class="hud-year">1603 AD</div>
+      </div>
+      <div class="hud-energy">✦ 8 <div class="energy-bar"><div class="energy-fill" style="width:40%"></div></div></div>
+    </div>
+    <div class="fab">✦</div>
+    <div style="position:absolute;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(212,168,87,0.15);border:1px solid rgba(212,168,87,0.3);border-radius:10px;padding:8px 16px;z-index:10;text-align:center;">
+      <div style="font-size:13px;color:#d4a857;font-weight:600;">Bountiful Harvest</div>
+      <div style="font-size:11px;color:#999;">Your people prosper. +food, +growth.</div>
+    </div>
+  </div>
+
+  <!-- SCREEN 10: First Event -->
+  <div class="screen game-screen" id="screen10">
+    <div class="map-bg"></div>
+    <div class="map-regions">
+      <div class="region neutral" style="top:15%;left:10%;width:25%;height:20%;"></div>
+      <div class="region neutral" style="top:10%;left:40%;width:30%;height:18%;"></div>
+      <div class="region rival" style="top:5%;right:5%;width:22%;height:22%;"></div>
+      <div class="region player" style="top:38%;left:22%;width:28%;height:22%;"></div>
+      <div class="region neutral" style="top:35%;right:10%;width:25%;height:20%;"></div>
+      <div class="region rival" style="top:62%;left:8%;width:22%;height:18%;"></div>
+      <div class="region neutral" style="top:60%;left:35%;width:30%;height:22%;"></div>
+      <div class="region neutral" style="top:65%;right:5%;width:20%;height:18%;"></div>
+    </div>
+    <div class="game-hud-top">
+      <div class="hud-left">
+        <div class="hud-speed">1×</div>
+        <div class="hud-year">1618 AD</div>
+      </div>
+      <div class="hud-energy">✦ 12 <div class="energy-bar"><div class="energy-fill" style="width:60%"></div></div></div>
+    </div>
+    <div class="fab">✦</div>
+    <div class="event-card-overlay">
+      <div class="event-card fade-in">
+        <div class="event-era">Renaissance · 1618 AD</div>
+        <div style="font-size:10px;color:#aaa;background:rgba(255,255,255,0.06);border-radius:6px;padding:4px 8px;display:inline-block;margin-bottom:10px;">⚔ Valdorn → Alaris</div>
+        <div class="event-title">Border Tensions</div>
+        <div class="event-desc">The Kingdom of Valdorn masses troops near the Alaris border. Your followers live on both sides.</div>
+        <div style="font-size:11px;color:#d4a857;background:rgba(212,168,87,0.08);border-radius:8px;padding:8px 10px;margin-bottom:14px;text-align:left;">
+          <div>Your followers in <strong>Alaris</strong>: 8,400 (defenders)</div>
+          <div style="margin-top:3px;">Your followers in <strong>Valdorn</strong>: 12,100 (aggressors)</div>
+        </div>
+        <div class="event-choice" onclick="nextStep()">
+          <strong>Bless the defenders of Alaris.</strong>
+          <div class="choice-effect">+faith in Alaris · −faith in Valdorn (they feel abandoned) · Costs 2 ✦</div>
+        </div>
+        <div class="event-choice">
+          <strong>Stay silent.</strong>
+          <div class="choice-effect">No divine action. Both sides question your will.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 11: Era Summary -->
+  <div class="screen game-screen" id="screen11">
+    <div class="map-bg"></div>
+    <div class="map-regions">
+      <div class="region neutral" style="top:15%;left:10%;width:25%;height:20%;"></div>
+      <div class="region player" style="top:10%;left:40%;width:30%;height:18%;"></div>
+      <div class="region rival" style="top:5%;right:5%;width:22%;height:22%;"></div>
+      <div class="region player" style="top:38%;left:22%;width:28%;height:22%;"></div>
+      <div class="region neutral" style="top:35%;right:10%;width:25%;height:20%;"></div>
+      <div class="region rival" style="top:62%;left:8%;width:22%;height:18%;"></div>
+      <div class="region player" style="top:60%;left:35%;width:30%;height:22%;"></div>
+      <div class="region neutral" style="top:65%;right:5%;width:20%;height:18%;"></div>
+    </div>
+    <div class="game-hud-top">
+      <div class="hud-left">
+        <div class="hud-speed">1×</div>
+        <div class="hud-year">1650 AD</div>
+      </div>
+      <div class="hud-energy">✦ 15 <div class="energy-bar"><div class="energy-fill" style="width:75%"></div></div></div>
+    </div>
+    <div class="fab">✦</div>
+    <div class="era-summary-overlay">
+      <div class="era-summary fade-in">
+        <div class="era-badge">Era 1 Complete</div>
+        <div class="era-name">The Renaissance</div>
+        <div class="era-years">1600 — 1650 AD</div>
+        <div class="era-stat-grid">
+          <div class="era-stat"><div class="stat-value">84K</div><div class="stat-label">Followers</div></div>
+          <div class="era-stat"><div class="stat-value">3</div><div class="stat-label">Regions</div></div>
+          <div class="era-stat"><div class="stat-value">7</div><div class="stat-label">Interventions</div></div>
+          <div class="era-stat"><div class="stat-value">1</div><div class="stat-label">Science</div></div>
+        </div>
+        <div class="era-next-hint">"The age of Exploration dawns. New lands beckon."</div>
+        <button class="action-btn" style="max-width:260px;" onclick="this.textContent='✓ Continue to Era 2';">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+
+<script>
+const steps = [
+  { id: 'screen1',  label: 'Step 1: The Void',              note: 'Black screen, ambient hum. 2 seconds. "You have arrived." Sets the god-awakening tone.' },
+  { id: 'screen2',  label: 'Step 2: Earth Appears',          note: 'Planet fades in over 3 seconds, floating gently. "This is your Earth. It needs a God."' },
+  { id: 'screen3',  label: 'Step 3: Main Menu',              note: 'First launch: no Continue button, no Earth counter. Just "Create New Earth" as primary CTA.' },
+  { id: 'screen4',  label: 'Step 4: Archetype Selection',    note: 'Three paths. Tap one to select (gold border). Shows 3 sample commandments per archetype. Player-paced.' },
+  { id: 'screen5',  label: 'Step 5: Commandment Review',     note: 'Shepherd\'s 10 pre-filled. All checked. Player can tap any to deselect and swap. Grid mode by default.' },
+  { id: 'screen6',  label: 'Step 6: World Generation',       note: 'Globe rotates, progress text cycles. 2-5 seconds. Building anticipation before the map reveals.' },
+  { id: 'screen7',  label: 'Step 7: Tutorial — Your Region', note: 'Spotlight on player region (gold glow). First of 3 initial callouts. ~10 seconds.' },
+  { id: 'screen8',  label: 'Step 8: Tutorial — FAB Blessing',note: 'FAB pulses gold. Third callout. After this, tutorial releases — world unpauses.' },
+  { id: 'screen9',  label: 'Step 9: First Blessing Cast',    note: 'AHA MOMENT (~minute 5). Golden wheat VFX on your region. Energy drops 10→8. "Your people prosper."' },
+  { id: 'screen10', label: 'Step 10: First Event',           note: 'Event scoped to two nations. Shows follower counts on BOTH sides. Player chooses as a god — blessing one side means the other feels abandoned.' },
+  { id: 'screen11', label: 'Step 11: Era 1 Summary',         note: 'Natural stopping point at ~minute 20. Stats recap. "Continue" resumes into Era 2. Safe to put phone down.' },
+];
+
+let current = 0;
+
+function showStep(idx) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(steps[idx].id).classList.add('active');
+  document.getElementById('stepLabel').textContent = steps[idx].label;
+  document.getElementById('stepCount').textContent = ` — ${idx + 1} / ${steps.length}`;
+  document.getElementById('designNote').textContent = steps[idx].note;
+  document.getElementById('prevBtn').disabled = idx === 0;
+  document.getElementById('nextBtn').disabled = idx === steps.length - 1;
+  if (idx === steps.length - 1) {
+    document.getElementById('nextBtn').textContent = 'End';
+  } else {
+    document.getElementById('nextBtn').textContent = 'Next →';
+  }
+}
+
+function nextStep() { if (current < steps.length - 1) { current++; showStep(current); } }
+function prevStep() { if (current > 0) { current--; showStep(current); } }
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); prevStep(); }
+});
+
+showStep(0);
+</script>
+
+</body>
+</html>

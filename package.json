@@ -1,0 +1,31 @@
+{
+  "name": "divine-dominion",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prototype": "tsx src/prototype/run.ts",
+    "prototype:seed": "tsx src/prototype/run.ts --seed=12345"
+  },
+  "dependencies": {
+    "d3-delaunay": "^6.0.4",
+    "immer": "^10.1.1",
+    "lz-string": "^1.5.0",
+    "phaser": "^3.80.0",
+    "simplex-noise": "^4.0.1",
+    "@capacitor/core": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0",
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^25.5.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "@vitest/coverage-v8": "^2.1.0",
+    "vitest": "^2.1.0"
+  }
+}

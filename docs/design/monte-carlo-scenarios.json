@@ -1,0 +1,324 @@
+{
+  "scenarios": [
+    {
+      "id": "peace-shepherd-01",
+      "seed": 42,
+      "archetype": "shepherd",
+      "commandments": [
+        "convert_by_example", "turn_other_cheek", "share_all_wealth",
+        "teach_every_child", "harmony_with_seasons", "all_life_sacred",
+        "diplomatic_union", "charity_above_all", "god_is_silent", "forgive_and_redeem"
+      ],
+      "strategy": "passive",
+      "strategy_description": "Never use disasters, bless science cities, rely on culture and trade for expansion",
+      "expected_win_rate_min": 0.30,
+      "expected_win_rate_max": 0.45,
+      "expected_defense_grid_year_max": 2170,
+      "tags": ["archetype", "peace-only"]
+    },
+    {
+      "id": "peace-shepherd-02",
+      "seed": 137,
+      "archetype": "shepherd",
+      "commandments": [
+        "preach_to_all_lands", "diplomatic_union", "seek_truth",
+        "learn_from_all", "celebrate_life", "earth_is_sacred",
+        "forgive_and_redeem", "convert_by_example", "honor_elders", "charity_above_all"
+      ],
+      "strategy": "passive",
+      "strategy_description": "Diplomatic shepherd with science focus, bless trade cities, promote peace whispers",
+      "expected_win_rate_min": 0.35,
+      "expected_win_rate_max": 0.50,
+      "expected_defense_grid_year_max": 2160,
+      "tags": ["archetype", "peace-science"]
+    },
+    {
+      "id": "peace-shepherd-03",
+      "seed": 256,
+      "archetype": "shepherd",
+      "commandments": [
+        "sacred_borders", "righteous_defense", "teach_every_child",
+        "share_all_wealth", "build_great_works", "harmony_with_seasons",
+        "all_life_sacred", "god_is_silent", "honor_elders", "sacred_knowledge"
+      ],
+      "strategy": "passive",
+      "strategy_description": "Defensive fortress shepherd, never expand, develop internally, shield key regions",
+      "expected_win_rate_min": 0.25,
+      "expected_win_rate_max": 0.40,
+      "expected_defense_grid_year_max": 2175,
+      "tags": ["archetype", "defense-only"]
+    },
+    {
+      "id": "justice-judge-01",
+      "seed": 512,
+      "archetype": "judge",
+      "commandments": [
+        "justice_absolute", "discipline_above_all", "righteous_defense",
+        "sacred_knowledge", "build_great_works", "honor_elders",
+        "fear_gods_wrath", "reward_the_strong", "seek_truth", "convert_by_example"
+      ],
+      "strategy": "hybrid",
+      "strategy_description": "Balanced justice with order and development, use disasters on aggressors only",
+      "expected_win_rate_min": 0.40,
+      "expected_win_rate_max": 0.55,
+      "expected_defense_grid_year_max": 2155,
+      "tags": ["archetype", "balanced"]
+    },
+    {
+      "id": "justice-judge-02",
+      "seed": 789,
+      "archetype": "judge",
+      "commandments": [
+        "signs_and_wonders", "fear_gods_wrath", "justice_absolute",
+        "preach_to_all_lands", "sacrifices_please_god", "discipline_above_all",
+        "conquer_and_enlighten", "seek_truth", "holy_conquest", "sacred_knowledge"
+      ],
+      "strategy": "hybrid",
+      "strategy_description": "Theocratic judge, use miracles frequently, conquer defensively, integrate conquered",
+      "expected_win_rate_min": 0.35,
+      "expected_win_rate_max": 0.50,
+      "expected_defense_grid_year_max": 2160,
+      "tags": ["archetype", "theocratic"]
+    },
+    {
+      "id": "justice-judge-03",
+      "seed": 1024,
+      "archetype": "judge",
+      "commandments": [
+        "justice_absolute", "learn_from_all", "diplomatic_union",
+        "reward_the_strong", "build_great_works", "help_themselves",
+        "teach_every_child", "convert_by_example", "wander_and_explore", "forgive_and_redeem"
+      ],
+      "strategy": "hybrid",
+      "strategy_description": "Trade-focused moderate judge, build alliances, develop through commerce",
+      "expected_win_rate_min": 0.40,
+      "expected_win_rate_max": 0.55,
+      "expected_defense_grid_year_max": 2150,
+      "tags": ["archetype", "trade-focused"]
+    },
+    {
+      "id": "war-conqueror-01",
+      "seed": 1337,
+      "archetype": "conqueror",
+      "commandments": [
+        "smite_the_wicked", "holy_conquest", "conquer_and_enlighten",
+        "fear_gods_wrath", "dominion_over_nature", "reward_the_strong",
+        "discipline_above_all", "preach_to_all_lands", "ends_justify_means", "sacrifices_please_god"
+      ],
+      "strategy": "aggressive",
+      "strategy_description": "Full military conquest, use all disasters freely, convert by sword, no moral limits",
+      "expected_win_rate_min": 0.30,
+      "expected_win_rate_max": 0.45,
+      "expected_defense_grid_year_max": 2175,
+      "tags": ["archetype", "war-only"]
+    },
+    {
+      "id": "war-conqueror-02",
+      "seed": 2048,
+      "archetype": "conqueror",
+      "commandments": [
+        "smite_the_wicked", "conquer_and_enlighten", "seek_truth",
+        "teach_every_child", "build_great_works", "fear_gods_wrath",
+        "dominion_over_nature", "reward_the_strong", "preach_to_all_lands", "learn_from_all"
+      ],
+      "strategy": "aggressive",
+      "strategy_description": "Expansionist with science priority, conquer then develop, steal tech via trade",
+      "expected_win_rate_min": 0.35,
+      "expected_win_rate_max": 0.50,
+      "expected_defense_grid_year_max": 2165,
+      "tags": ["archetype", "war-science"]
+    },
+    {
+      "id": "war-conqueror-03",
+      "seed": 4096,
+      "archetype": "conqueror",
+      "commandments": [
+        "smite_the_wicked", "holy_conquest", "welcome_all",
+        "fear_gods_wrath", "signs_and_wonders", "sacrifices_please_god",
+        "ends_justify_means", "discipline_above_all", "dominion_over_nature", "conquer_and_enlighten"
+      ],
+      "strategy": "aggressive",
+      "strategy_description": "Holy warrior all-in, maximum aggression, divine power spam, rapid forced conversion",
+      "expected_win_rate_min": 0.25,
+      "expected_win_rate_max": 0.40,
+      "expected_defense_grid_year_max": 2180,
+      "tags": ["archetype", "holy-war"]
+    },
+    {
+      "id": "edge-all-peace",
+      "seed": 8192,
+      "archetype": "shepherd",
+      "commandments": [
+        "turn_other_cheek", "sacred_borders", "all_life_sacred",
+        "share_all_wealth", "charity_above_all", "god_is_silent",
+        "earth_is_sacred", "harmony_with_seasons", "convert_by_example", "forgive_and_redeem"
+      ],
+      "strategy": "passive",
+      "strategy_description": "Maximum pacifism, no wars, no disasters, no aggressive actions. Pure culture and prayer.",
+      "expected_win_rate_min": 0.20,
+      "expected_win_rate_max": 0.35,
+      "expected_defense_grid_year_max": 2180,
+      "tags": ["edge-case", "max-peace"]
+    },
+    {
+      "id": "edge-max-tension",
+      "seed": 16384,
+      "archetype": "judge",
+      "commandments": [
+        "turn_other_cheek", "smite_the_wicked", "share_all_wealth",
+        "reward_the_strong", "seek_truth", "sacred_knowledge",
+        "all_life_sacred", "ends_justify_means", "god_is_silent", "signs_and_wonders"
+      ],
+      "strategy": "hybrid",
+      "strategy_description": "5 tension pairs active (+110% schism risk). Tests whether schism cascade is survivable.",
+      "expected_win_rate_min": 0.10,
+      "expected_win_rate_max": 0.25,
+      "expected_defense_grid_year_max": 2190,
+      "tags": ["edge-case", "max-tension"]
+    },
+    {
+      "id": "edge-random",
+      "seed": 32768,
+      "archetype": "judge",
+      "commandments": [
+        "welcome_all", "discipline_above_all", "wander_and_explore",
+        "sacred_knowledge", "sacrifices_please_god", "celebrate_life",
+        "justice_absolute", "dominion_over_nature", "righteous_defense", "learn_from_all"
+      ],
+      "strategy": "random",
+      "strategy_description": "Pseudo-random commandment selection, random divine power usage, no coherent strategy",
+      "expected_win_rate_min": 0.15,
+      "expected_win_rate_max": 0.30,
+      "expected_defense_grid_year_max": 2185,
+      "tags": ["edge-case", "random"]
+    },
+    {
+      "id": "unlock-science",
+      "seed": 65536,
+      "archetype": "judge",
+      "commandments": [
+        "steal_the_fire", "dangerous_experiments", "seek_truth",
+        "teach_every_child", "learn_from_all", "industrial_zeal",
+        "build_great_works", "reward_the_strong", "help_themselves", "divine_economy"
+      ],
+      "strategy": "hybrid",
+      "strategy_description": "Maximum research stacking with unlockables (+1.45 research pre-cap → +0.75). Tests cap enforcement.",
+      "expected_win_rate_min": 0.35,
+      "expected_win_rate_max": 0.55,
+      "expected_defense_grid_year_max": 2140,
+      "tags": ["unlockable-heavy", "science-rush"]
+    },
+    {
+      "id": "unlock-war",
+      "seed": 99999,
+      "archetype": "conqueror",
+      "commandments": [
+        "mercenary_blessing", "zealotry", "caste_system",
+        "smite_the_wicked", "holy_conquest", "conquer_and_enlighten",
+        "fear_gods_wrath", "ends_justify_means", "dominion_over_nature", "industrial_zeal"
+      ],
+      "strategy": "aggressive",
+      "strategy_description": "Military unlockable build, maximum conquest + economy, no moral constraints",
+      "expected_win_rate_min": 0.30,
+      "expected_win_rate_max": 0.45,
+      "expected_defense_grid_year_max": 2175,
+      "tags": ["unlockable-heavy", "war-economy"]
+    },
+    {
+      "id": "unlock-peace",
+      "seed": 55555,
+      "archetype": "shepherd",
+      "commandments": [
+        "hidden_faith", "weather_mastery", "cultural_hegemony",
+        "asymmetric_warfare", "turn_other_cheek", "diplomatic_union",
+        "all_life_sacred", "learn_from_all", "harmony_with_seasons", "charity_above_all"
+      ],
+      "strategy": "passive",
+      "strategy_description": "Peace unlockable build, covert conversion + disaster immunity + unbreakable defense",
+      "expected_win_rate_min": 0.30,
+      "expected_win_rate_max": 0.45,
+      "expected_defense_grid_year_max": 2165,
+      "tags": ["unlockable-heavy", "stealth-peace"]
+    },
+    {
+      "id": "hybrid-trade",
+      "seed": 11111,
+      "archetype": "judge",
+      "commandments": [
+        "cultural_hegemony", "learn_from_all", "wander_and_explore",
+        "diplomatic_union", "reward_the_strong", "build_great_works",
+        "help_themselves", "seek_truth", "convert_by_example", "forgive_and_redeem"
+      ],
+      "strategy": "hybrid",
+      "strategy_description": "Trade empire build, maximize trade routes, spread faith through commerce",
+      "expected_win_rate_min": 0.40,
+      "expected_win_rate_max": 0.55,
+      "expected_defense_grid_year_max": 2150,
+      "tags": ["hybrid", "trade-focused"]
+    },
+    {
+      "id": "hybrid-divine",
+      "seed": 22222,
+      "archetype": "shepherd",
+      "commandments": [
+        "sacrifices_please_god", "signs_and_wonders", "echoes_of_creation",
+        "prophet_lineage", "fear_gods_wrath", "preach_to_all_lands",
+        "celebrate_life", "earth_is_sacred", "build_great_works", "harmony_with_seasons"
+      ],
+      "strategy": "hybrid",
+      "strategy_description": "Divine power focused, maximize energy regen, splash effects, frequent miracles",
+      "expected_win_rate_min": 0.35,
+      "expected_win_rate_max": 0.50,
+      "expected_defense_grid_year_max": 2160,
+      "tags": ["hybrid", "divine-focused"]
+    },
+    {
+      "id": "hybrid-balanced",
+      "seed": 33333,
+      "archetype": "judge",
+      "commandments": [
+        "preach_to_all_lands", "diplomatic_union", "seek_truth",
+        "celebrate_life", "help_themselves", "harmony_with_seasons",
+        "forgive_and_redeem", "learn_from_all", "build_great_works", "honor_elders"
+      ],
+      "strategy": "hybrid",
+      "strategy_description": "Maximum category spread (7 categories represented), balanced moderate bonuses everywhere",
+      "expected_win_rate_min": 0.40,
+      "expected_win_rate_max": 0.55,
+      "expected_defense_grid_year_max": 2155,
+      "tags": ["hybrid", "balanced"]
+    },
+    {
+      "id": "optimal-meta",
+      "seed": 44444,
+      "archetype": "judge",
+      "commandments": [
+        "seek_truth", "teach_every_child", "learn_from_all",
+        "diplomatic_union", "build_great_works", "help_themselves",
+        "harmony_with_seasons", "celebrate_life", "forgive_and_redeem", "convert_by_example"
+      ],
+      "strategy": "optimal",
+      "strategy_description": "Theoretical optimal: strong research + diplomacy + happiness, low cost powers, good integration. Should approach but not exceed 70% win rate.",
+      "expected_win_rate_min": 0.55,
+      "expected_win_rate_max": 0.70,
+      "expected_defense_grid_year_max": 2140,
+      "tags": ["optimal", "ceiling-test"]
+    },
+    {
+      "id": "degenerate-exploit",
+      "seed": 77777,
+      "archetype": "judge",
+      "commandments": [
+        "dangerous_experiments", "steal_the_fire", "industrial_zeal",
+        "seek_truth", "learn_from_all", "teach_every_child",
+        "help_themselves", "divine_economy", "cultural_hegemony", "reward_the_strong"
+      ],
+      "strategy": "degenerate",
+      "strategy_description": "Maximum research stacking exploit test: 6 research commandments (+1.45 pre-cap → +0.75 capped). Must NOT exceed 60% win rate. If it does, cap is leaking or research is overvalued.",
+      "expected_win_rate_min": 0.35,
+      "expected_win_rate_max": 0.55,
+      "expected_defense_grid_year_max": 2135,
+      "tags": ["degenerate", "exploit-test", "cap-validation"]
+    }
+  ]
+}

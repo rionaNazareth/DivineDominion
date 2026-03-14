@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAB + Overlay Combos — Interactive Wireframes</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #0e0e0e;
+    color: #e0e0e0;
+    padding: 40px 20px 80px;
+  }
+  h1 { text-align: center; font-size: 28px; color: #d4a857; margin-bottom: 4px; letter-spacing: 1px; }
+  .page-sub { text-align: center; color: #888; font-size: 13px; margin-bottom: 12px; }
+  .instructions { text-align: center; color: #666; font-size: 12px; margin-bottom: 48px; font-style: italic; }
+
+  .combo-section {
+    max-width: 1000px;
+    margin: 0 auto 64px;
+    border: 1px solid #222;
+    border-radius: 20px;
+    padding: 32px 24px;
+    background: rgba(255,255,255,0.01);
+  }
+  .combo-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .combo-num {
+    font-size: 14px;
+    color: #888;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .combo-title {
+    font-size: 22px;
+    color: #d4a857;
+    font-weight: 700;
+  }
+  .combo-tagline {
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 24px;
+    padding-left: 0;
+  }
+
+  .phones-row {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .phone-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .phone-label {
+    font-size: 12px;
+    color: #aaa;
+    margin-bottom: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .phone-sublabel {
+    font-size: 10px;
+    color: #666;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
+  /* Phone shell */
+  .phone {
+    width: 280px;
+    height: 600px;
+    background: #1a1a2e;
+    border-radius: 36px;
+    border: 2.5px solid #2a2a2a;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+    cursor: pointer;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .phone:hover { border-color: #444; }
+  .phone.highlight { border-color: #d4a857; box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px #d4a857; }
+  .notch { width: 110px; height: 22px; background: #0e0e0e; border-radius: 0 0 14px 14px; margin: 0 auto; position: relative; z-index: 10; }
+  .home-ind { width: 100px; height: 4px; background: #333; border-radius: 2px; position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); z-index: 10; }
+
+  /* Map base */
+  .map {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(145deg, #152015 0%, #151528 35%, #0d1520 100%);
+    overflow: hidden;
+  }
+  .mr { position: absolute; border-radius: 38%; opacity: 0.35; }
+  .mr1 { width: 100px; height: 70px; top: 150px; left: 20px; background: #254025; }
+  .mr2 { width: 120px; height: 90px; top: 210px; left: 80px; background: #203520; }
+  .mr3 { width: 80px; height: 65px; top: 140px; left: 140px; background: #304030; }
+  .mr4 { width: 110px; height: 80px; top: 290px; left: 40px; background: #254030; }
+  .mr5 { width: 90px; height: 70px; top: 320px; left: 140px; background: #304025; }
+  .mr6 { width: 70px; height: 55px; top: 260px; left: 170px; background: #253530; }
+  .mr7 { width: 85px; height: 60px; top: 380px; left: 90px; background: #2a4028; }
+  .oc { position: absolute; background: #0a1530; border-radius: 50%; opacity: 0.25; }
+  .oc1 { width: 50px; height: 160px; top: 170px; left: 0; }
+  .oc2 { width: 65px; height: 130px; top: 300px; right: 5px; }
+  .tr { position: absolute; height: 1.5px; background: linear-gradient(90deg, transparent, #d4a857, transparent); opacity: 0.25; transform-origin: left center; }
+  .tr1 { width: 80px; top: 240px; left: 65px; transform: rotate(-12deg); }
+  .tr2 { width: 65px; top: 305px; left: 110px; transform: rotate(22deg); }
+  .cd { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #d4a857; box-shadow: 0 0 5px rgba(212,168,87,0.4); }
+  .cd1 { top: 185px; left: 65px; }
+  .cd2 { top: 240px; left: 135px; }
+  .cd3 { top: 315px; left: 85px; }
+  .cd4 { top: 170px; left: 180px; }
+  .cd5 { top: 350px; left: 175px; }
+  .cd6 { top: 400px; left: 120px; }
+
+  /* Top HUD */
+  .hud {
+    position: absolute;
+    top: 26px;
+    left: 10px;
+    right: 10px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 5;
+  }
+  .hud-l { display: flex; align-items: center; gap: 6px; }
+  .hud-c { display: flex; flex-direction: column; align-items: center; }
+  .hud-r { display: flex; align-items: center; gap: 6px; }
+  .spd {
+    background: rgba(0,0,0,0.45);
+    border: 1px solid #444;
+    border-radius: 10px;
+    padding: 3px 8px;
+    font-size: 9px;
+    color: #bbb;
+  }
+  .yr { font-size: 12px; color: #d4a857; font-weight: 700; }
+  .era { font-size: 8px; color: #777; }
+  .nrg {
+    background: rgba(0,0,0,0.45);
+    border: 1px solid #4477aa;
+    border-radius: 10px;
+    padding: 3px 8px;
+    font-size: 9px;
+    color: #88bbee;
+  }
+  .eye-hud {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.45);
+    border: 1px solid #5a4aad;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    transition: all 0.3s;
+  }
+  .eye-hud.on {
+    background: rgba(90,74,173,0.3);
+    border-color: #8a7add;
+    box-shadow: 0 0 8px rgba(90,74,173,0.4);
+  }
+
+  /* FAB */
+  .fab {
+    position: absolute;
+    bottom: 34px;
+    right: 16px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #d4a857, #b08828);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 3px 12px rgba(212,168,87,0.35);
+    z-index: 6;
+    transition: all 0.3s;
+    color: #1a1a2e;
+    font-weight: 700;
+  }
+  .fab.eye-mode {
+    background: linear-gradient(135deg, #6a5acd, #4a3aad);
+    box-shadow: 0 3px 12px rgba(106,90,205,0.35);
+    color: #e0e0ff;
+  }
+  .fab.has-overlay-ring {
+    box-shadow: 0 3px 12px rgba(212,168,87,0.35), 0 0 0 3px rgba(106,90,205,0.5);
+  }
+
+  /* Dual arcs */
+  .arc-container {
+    position: absolute;
+    bottom: 30px;
+    right: 12px;
+    width: 220px;
+    height: 220px;
+    z-index: 7;
+    display: none;
+    pointer-events: none;
+  }
+  .arc-container.show { display: block; }
+  .arc-btn {
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    pointer-events: auto;
+    transition: transform 0.15s;
+    border: 1.5px solid;
+  }
+  .arc-btn:hover { transform: scale(1.15); }
+  .ab {
+    background: rgba(212,168,87,0.15);
+    border-color: rgba(212,168,87,0.5);
+  }
+  .ad {
+    background: rgba(200,50,50,0.15);
+    border-color: rgba(200,50,50,0.5);
+  }
+  .ae {
+    background: rgba(106,90,205,0.25);
+    border-color: rgba(106,90,205,0.7);
+    box-shadow: 0 0 8px rgba(106,90,205,0.3);
+  }
+  /* Blessing arc positions (left side) */
+  .b1 { bottom: 175px; right: 85px; }
+  .b2 { bottom: 155px; right: 130px; }
+  .b3 { bottom: 120px; right: 165px; }
+  .b4 { bottom: 80px; right: 180px; }
+  .b5 { bottom: 45px; right: 175px; }
+  .b6 { bottom: 15px; right: 150px; }
+  /* Disaster arc positions (right side / above) */
+  .d1 { bottom: 175px; right: 45px; }
+  .d2 { bottom: 155px; right: 0px; }
+  .d3 { bottom: 120px; right: -15px; }
+  /* Eye at apex */
+  .eye-apex { bottom: 188px; right: 63px; width: 40px; height: 40px; font-size: 15px; }
+
+  /* Overlay effects */
+  .ov-layer {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 3;
+    display: none;
+  }
+  .ov-on .ov-layer { display: block; }
+  .ov-on .mr { opacity: 0.12; }
+  .rh { position: absolute; border-radius: 50%; }
+  .rh1 { width: 110px; height: 95px; top: 155px; left: 30px; background: radial-gradient(circle, rgba(212,168,87,0.4) 0%, transparent 70%); }
+  .rh2 { width: 80px; height: 70px; top: 300px; left: 50px; background: radial-gradient(circle, rgba(212,168,87,0.35) 0%, transparent 70%); }
+  .rh3 { width: 95px; height: 80px; top: 215px; left: 125px; background: radial-gradient(circle, rgba(80,100,200,0.35) 0%, transparent 70%); }
+  .rh4 { width: 70px; height: 60px; top: 320px; left: 145px; background: radial-gradient(circle, rgba(200,70,70,0.3) 0%, transparent 70%); }
+  .atk { position: absolute; font-size: 13px; color: #ff6666; opacity: 0.6; }
+  .atk1 { top: 270px; left: 120px; transform: rotate(25deg); }
+  .atk2 { top: 210px; left: 165px; transform: rotate(110deg); }
+  .tn-brd { position: absolute; border: 1.5px dashed #ff4444; border-radius: 38%; opacity: 0.45; }
+  .tn1 { width: 50px; height: 38px; top: 255px; left: 150px; }
+
+  /* Layer picker */
+  .lp {
+    position: absolute;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.75);
+    border: 1px solid #444;
+    border-radius: 10px;
+    padding: 6px;
+    gap: 3px;
+    z-index: 8;
+    backdrop-filter: blur(6px);
+    display: none;
+    flex-direction: row;
+  }
+  .ov-on .lp { display: flex; }
+  .lb {
+    padding: 5px 9px;
+    border-radius: 6px;
+    font-size: 8px;
+    border: 1px solid #383838;
+    color: #999;
+    background: transparent;
+    white-space: nowrap;
+  }
+  .lb.on {
+    background: rgba(106,90,205,0.25);
+    border-color: #5a4aad;
+    color: #c0b0ff;
+  }
+
+  /* Bottom sheet (for combo 2) */
+  .bsheet {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(20,20,40,0.95);
+    border-top: 1px solid #333;
+    border-radius: 16px 16px 0 0;
+    padding: 12px 16px 40px;
+    z-index: 8;
+    backdrop-filter: blur(8px);
+    display: none;
+  }
+  .bsheet.show { display: block; }
+  .bsheet-handle {
+    width: 36px;
+    height: 4px;
+    background: #444;
+    border-radius: 2px;
+    margin: 0 auto 10px;
+  }
+  .bsheet-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #d4a857;
+    margin-bottom: 2px;
+  }
+  .bsheet-stats {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .bs-stat {
+    font-size: 9px;
+    color: #888;
+  }
+  .bs-stat span {
+    color: #ccc;
+    font-weight: 600;
+  }
+  .bsheet-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .bs-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1.5px solid;
+  }
+  .bs-bless {
+    background: rgba(212,168,87,0.12);
+    border-color: rgba(212,168,87,0.4);
+    color: #d4a857;
+  }
+  .bs-smite {
+    background: rgba(200,50,50,0.12);
+    border-color: rgba(200,50,50,0.4);
+    color: #cc5555;
+  }
+
+  /* Inline power picker in bottom sheet */
+  .bs-powers {
+    display: none;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #2a2a2a;
+  }
+  .bs-powers.show { display: flex; }
+  .bsp {
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 9px;
+    border: 1px solid rgba(212,168,87,0.3);
+    color: #d4a857;
+    background: rgba(212,168,87,0.08);
+  }
+  .bsp.dis {
+    border-color: rgba(200,50,50,0.3);
+    color: #cc5555;
+    background: rgba(200,50,50,0.08);
+  }
+
+  /* Selected region highlight */
+  .mr.selected {
+    opacity: 0.6 !important;
+    box-shadow: 0 0 12px rgba(212,168,87,0.3);
+    border: 1.5px solid rgba(212,168,87,0.4);
+  }
+
+  /* Annotations */
+  .ann {
+    position: absolute;
+    z-index: 9;
+    pointer-events: none;
+  }
+  .ann-box {
+    background: rgba(212,168,87,0.12);
+    border: 1px solid rgba(212,168,87,0.4);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 8px;
+    color: #d4a857;
+    white-space: nowrap;
+    line-height: 1.3;
+  }
+  .ann-arrow {
+    display: inline;
+    color: #d4a857;
+    opacity: 0.6;
+  }
+
+  /* Analysis cards */
+  .combo-analysis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 8px;
+  }
+  .ca-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid #222;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  .ca-card h4 { color: #d4a857; font-size: 12px; margin-bottom: 6px; }
+  .ca-card ul { list-style: none; padding: 0; }
+  .ca-card li { margin-bottom: 3px; padding-left: 14px; position: relative; }
+  .ca-card li::before { position: absolute; left: 0; }
+  .ca-card li.p::before { content: '✓'; color: #5cb85c; }
+  .ca-card li.c::before { content: '✗'; color: #cc5555; }
+
+  /* Comparison table */
+  .cmp {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid #222;
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .cmp h2 { color: #d4a857; font-size: 20px; margin-bottom: 16px; text-align: center; }
+  .cmp table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .cmp th { text-align: left; padding: 8px 10px; border-bottom: 1px solid #2a2a2a; color: #d4a857; font-weight: 600; }
+  .cmp td { padding: 8px 10px; border-bottom: 1px solid #181818; color: #ccc; vertical-align: top; }
+  .hi { color: #5cb85c; font-weight: 700; }
+  .mi { color: #ccaa44; font-weight: 700; }
+  .lo { color: #cc5555; font-weight: 700; }
+  .winner { background: rgba(212,168,87,0.06); }
+
+  .rec-badge {
+    display: inline-block;
+    background: rgba(212,168,87,0.15);
+    border: 1px solid #d4a857;
+    border-radius: 6px;
+    padding: 2px 10px;
+    font-size: 10px;
+    color: #d4a857;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<h1>FAB + Overlay Combos</h1>
+<p class="page-sub">Three integrated approaches — powers and divine sight as one design</p>
+<p class="instructions">Tap each phone to cycle through interaction states (idle → powers open → overlay on)</p>
+
+<!-- ============================================ -->
+<!-- COMBO 1: Dual-Arc + HUD Eye -->
+<!-- ============================================ -->
+<div class="combo-section">
+  <div class="combo-header">
+    <span class="combo-num">Combo 1</span>
+    <span class="combo-title">Dual-Arc FAB + HUD Eye</span>
+  </div>
+  <p class="combo-tagline">Separation of concerns — FAB handles powers, top-bar eye handles overlay. Two buttons, two jobs.</p>
+
+  <div class="phones-row">
+    <!-- State 1: Idle -->
+    <div class="phone-col">
+      <div class="phone-label">Idle</div>
+      <div class="phone-sublabel">Map view, no interaction</div>
+      <div class="phone" id="c1idle">
+        <div class="notch"></div>
+        <div class="map">
+          <div class="oc oc1"></div><div class="oc oc2"></div>
+          <div class="mr mr1"></div><div class="mr mr2"></div><div class="mr mr3"></div>
+          <div class="mr mr4"></div><div class="mr mr5"></div><div class="mr mr6"></div><div class="mr mr7"></div>
+          <div class="tr tr1"></div><div class="tr tr2"></div>
+          <div class="cd cd1"></div><div class="cd cd2"></div><div class="cd cd3"></div>
+          <div class="cd cd4"></div><div class="cd cd5"></div><div class="cd cd6"></div>
+        </div>
+        <div class="hud">
+          <div class="hud-l"><div class="spd">2×</div></div>
+          <div class="hud-c"><div class="yr">1743</div><div class="era">Enlightenment</div></div>
+          <div class="hud-r"><div class="nrg">⚡14</div><div class="eye-hud">👁</div></div>
+        </div>
+        <div class="fab">✦</div>
+        <div class="ann" style="top:26px; right:55px;"><div class="ann-box">← Eye always in HUD</div></div>
+        <div class="ann" style="bottom:30px; right:70px;"><div class="ann-box">FAB = powers only →</div></div>
+        <div class="home-ind"></div>
+      </div>
+    </div>
+
+    <!-- State 2: FAB open (arcs) -->
+    <div class="phone-col">
+      <div class="phone-label">Powers Open</div>
+      <div class="phone-sublabel">Tap FAB → dual arcs expand</div>
+      <div class="phone" id="c1arcs">
+        <div class="notch"></div>
+        <div class="map">
+          <div class="oc oc1"></div><div class="oc oc2"></div>
+          <div class="mr mr1"></div><div class="mr mr2"></div><div class="mr mr3"></div>
+          <div class="mr mr4"></div><div class="mr mr5"></div><div class="mr mr6"></div><div class="mr mr7"></div>
+          <div class="tr tr1"></div><div class="tr tr2"></div>
+          <div class="cd cd1"></div><div class="cd cd2"></div><div class="cd cd3"></div>
+          <div class="cd cd4"></div><div class="cd cd5"></div><div class="cd cd6"></div>
+        </div>
+        <div class="hud">
+          <div class="hud-l"><div class="spd">2×</div></div>
+          <div class="hud-c"><div class="yr">1743</div><div class="era">Enlightenment</div></div>
+          <div class="hud-r"><div class="nrg">⚡14</div><div class="eye-hud">👁</div></div>
+        </div>
+        <div class="fab" style="opacity:0.6;">✦</div>
+        <div class="arc-container show">
+          <div class="arc-btn ab b1">🌾</div>
+          <div class="arc-btn ab b2">💡</div>
+          <div class="arc-btn ab b3">✨</div>
+          <div class="arc-btn ab b4">🙏</div>
+          <div class="arc-btn ab b5">🛡</div>
+          <div class="arc-btn ab b6">👑</div>
+          <div class="arc-btn ad d1">🌋</div>
+          <div class="arc-btn ad d2">🌊</div>
+          <div class="arc-btn ad d3">☠️</div>
+        </div>
+        <div class="ann" style="bottom:200px; left:10px;"><div class="ann-box">Blessings (gold arc) ↗</div></div>
+        <div class="ann" style="bottom:170px; right:5px;"><div class="ann-box">← Disasters (red arc)</div></div>
+        <div class="ann" style="bottom:100px; left:10px;"><div class="ann-box">No eye here — overlay<br>only via HUD button</div></div>
+        <div class="home-ind"></div>
+      </div>
+    </div>
+
+    <!-- State 3: Overlay on -->
+    <div class="phone-col">
+      <div class="phone-label">Overlay Active</div>
+      <div class="phone-sublabel">Tap HUD eye → divine data shown</div>
+      <div class="phone ov-on" id="c1ov">
+        <div class="notch"></div>
+        <div class="map">
+          <div class="oc oc1"></div><div class="oc oc2"></div>
+          <div class="mr mr1"></div><div class="mr mr2"></div><div class="mr mr3"></div>
+          <div class="mr mr4"></div><div class="mr mr5"></div><div class="mr mr6"></div><div class="mr mr7"></div>
+          <div class="tr tr1"></div><div class="tr tr2"></div>
+          <div class="cd cd1"></div><div class="cd cd2"></div><div class="cd cd3"></div>
+          <div class="cd cd4"></div><div class="cd cd5"></div><div class="cd cd6"></div>
+          <div class="ov-layer">
+            <div class="rh rh1"></div><div class="rh rh2"></div><div class="rh rh3"></div><div class="rh rh4"></div>
+            <div class="atk atk1">⟶</div><div class="atk atk2">⟶</div>
+            <div class="tn-brd tn1"></div>
+          </div>
+        </div>
+        <div class="hud">
+          <div class="hud-l"><div class="spd">2×</div></div>
+          <div class="hud-c"><div class="yr">1743</div><div class="era">Enlightenment</div></div>
+          <div class="hud-r"><div class="nrg">⚡14</div><div class="eye-hud on">👁</div></div>
+        </div>
+        <div class="fab">✦</div>
+        <div class="lp">
+          <div class="lb on">Religion</div>
+          <div class="lb">Military</div>
+          <div class="lb">Trade</div>
+          <div class="lb">Science</div>
+        </div>
+        <div class="ann" style="top:26px; right:55px;"><div class="ann-box">← Eye glows when active</div></div>
+        <div class="home-ind"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="combo-analysis">
+    <div class="ca-card">
+      <h4>Strengths</h4>
+      <ul>
+        <li class="p">Always discoverable — eye visible at all times</li>
+        <li class="p">Both power types visible at once (dual arcs)</li>
+        <li class="p">No blessing/disaster toggle step</li>
+        <li class="p">Clean separation: powers vs. information</li>
+        <li class="p">Screen reader friendly</li>
+      </ul>
+    </div>
+    <div class="ca-card">
+      <h4>Weaknesses</h4>
+      <ul>
+        <li class="c">HUD has one extra icon (eye)</li>
+        <li class="c">Can't check overlay mid-cast — must close arcs, tap eye, reopen arcs</li>
+        <li class="c">Two separate interactions to learn</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- COMBO 2: Target-First + FAB as Eye -->
+<!-- ============================================ -->
+<div class="combo-section">
+  <div class="combo-header">
+    <span class="combo-num">Combo 2</span>
+    <span class="combo-title">Target-First Casting + FAB as Divine Eye</span>
+  </div>
+  <p class="combo-tagline">Powers come from region context. FAB is freed entirely as the overlay toggle. One button = one job.</p>
+
+  <div class="phones-row">
+    <!-- State 1: Idle -->
+    <div class="phone-col">
+      <div class="phone-label">Idle</div>
+      <div class="phone-sublabel">Map view, FAB is the eye</div>
+      <div class="phone" id="c2idle">
+        <div class="notch"></div>
+        <div class="map">
+          <div class="oc oc1"></div><div class="oc oc2"></div>
+          <div class="mr mr1"></div><div class="mr mr2"></div><div class="mr mr3"></div>
+          <div class="mr mr4"></div><div class="mr mr5"></div><div class="mr mr6"></div><div class="mr mr7"></div>
+          <div class="tr tr1"></div><div class="tr tr2"></div>
+          <div class="cd cd1"></div><div class="cd cd2"></div><div class="cd cd3"></div>
+          <div class="cd cd4"></div><div class="cd cd5"></div><div class="cd cd6"></div>
+        </div>
+        <div class="hud">
+          <div class="hud-l"><div class="spd">2×</div></div>
+          <div class="hud-c"><div class="yr">1743</div><div class="era">Enlightenment</div></div>
+          <div class="hud-r"><div class="nrg">⚡14</div></div>
+        </div>
+        <div class="fab eye-mode">👁</div>
+        <div class="ann" style="bottom:30px; right:70px;"><div class="ann-box">FAB = divine eye only →</div></div>
+        <div class="ann" style="bottom:250px; left:10px;"><div class="ann-box">Tap any region to<br>get power options</div></div>
+        <div class="home-ind"></div>
+      </div>
+    </div>
+
+    <!-- State 2: Region selected → bottom sheet with powers -->
+    <div class="phone-col">
+      <div class="phone-label">Region Tapped</div>
+      <div class="phone-sublabel">Bottom sheet with Bless / Smite</div>
+      <div class="phone" id="c2sheet">
+        <div class="notch"></div>
+        <div class="map">
+          <div class="oc oc1"></div><div class="oc oc2"></div>
+          <div class="mr mr1"></div><div class="mr mr2 selected"></div><div class="mr mr3"></div>
+          <div class="mr mr4"></div><div class="mr mr5"></div><div class="mr mr6"></div><div class="mr mr7"></div>
+          <div class="tr tr1"></div><div class="tr tr2"></div>
+          <div class="cd cd1"></div><div class="cd cd2"></div><div class="cd cd3"></div>
+          <div class="cd cd4"></div><div class="cd cd5"></div><div class="cd cd6"></div>
+        </div>
+        <div class="hud">
+          <div class="hud-l"><div class="spd">2×</div></div>
+          <div class="hud-c"><div class="yr">1743</div><div class="era">Enlightenment</div></div>
+          <div class="hud-r"><div class="nrg">⚡14</div></div>
+        </div>
+        <div class="fab eye-mode">👁</div>
+        <div class="bsheet show">
+          <div class="bsheet-handle"></div>
+          <div class="bsheet-title">Eastern Plains</div>
+          <div class="bsheet-stats">
+            <div class="bs-stat">Pop <span>42K</span></div>
+            <div class="bs-stat">Faith <span>78%</span></div>
+            <div class="bs-stat">Dev <span>5</span></div>
+          </div>
+          <div class="bsheet-actions">
+            <div class="bs-btn bs-bless">🌟 Bless</div>
+            <div class="bs-btn bs-smite">💀 Smite</div>
+          </div>
+          <div class="bs-powers show">
+            <div class="bsp">🌾 Harvest (2)</div>
+            <div class="bsp">💡 Inspire (3)</div>
+            <div class="bsp">✨ Miracle (4)</div>
+            <div class="bsp">🙏 Prophet (5)</div>
+            <div class="bsp">🛡 Shield (3)</div>
+            <div class="bsp">👑 Golden Age (6)</div>
+          </div>
+        </div>
+        <div class="ann" style="bottom:220px; right:10px;"><div class="ann-box">Powers live in bottom sheet<br>Context = selected region</div></div>
+        <div class="home-ind"></div>
+      </div>
+    </div>
+
+    <!-- State 3: Overlay on -->
+    <div class="phone-col">
+      <div class="phone-label">Overlay Active</div>
+      <div class="phone-sublabel">Tap FAB → divine data shown</div>
+      <div class="phone ov-on" id="c2ov">
+        <div class="notch"></div>
+        <div class="map">
+          <div class="oc oc1"></div><div class="oc oc2"></div>
+          <div class="mr mr1"></div><div class="mr mr2"></div><div class="mr mr3"></div>
+          <div class="mr mr4"></div><div class="mr mr5"></div><div class="mr mr6"></div><div class="mr mr7"></div>
+          <div class="tr tr1"></div><div class="tr tr2"></div>
+          <div class="cd cd1"></div><div class="cd cd2"></div><div class="cd cd3"></div>
+          <div class="cd cd4"></div><div class="cd cd5"></div><div class="cd cd6"></div>
+          <div class="ov-layer">
+            <div class="rh rh1"></div><div class="rh rh2"></div><div class="rh rh3"></div><div class="rh rh4"></div>
+            <div class="atk atk1">⟶</div><div class="atk atk2">⟶</div>
+            <div class="tn-brd tn1"></div>
+          </div>
+        </div>
+        <div class="hud">
+          <div class="hud-l"><div class="spd">2×</div></div>
+          <div class="hud-c"><div class="yr">1743</div><div class="era">Enlightenment</div></div>
+          <div class="hud-r"><div class="nrg">⚡14</div></div>
+        </div>
+        <div class="fab eye-mode" style="box-shadow: 0 3px 12px rgba(106,90,205,0.35), 0 0 0 3px rgba(106,90,205,0.6);">👁</div>
+        <div class="lp">
+          <div class="lb on">Religion</div>
+          <div class="lb">Military</div>
+          <div class="lb">Trade</div>
+          <div class="lb">Science</div>
+        </div>
+        <div class="ann" style="bottom:30px; right:70px;"><div class="ann-box">FAB glows when active →</div></div>
+        <div class="home-ind"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="combo-analysis">
+    <div class="ca-card">
+      <h4>Strengths</h4>
+      <ul>
+        <li class="p">Solves BOTH decisions in one design</li>
+        <li class="p">Ultra-clean HUD — no extra buttons</li>
+        <li class="p">Region info + powers in one flow (bottom sheet)</li>
+        <li class="p">FAB is single-purpose = highly discoverable overlay</li>
+        <li class="p">Phone-native (bottom sheets are familiar)</li>
+      </ul>
+    </div>
+    <div class="ca-card">
+      <h4>Weaknesses</h4>
+      <ul>
+        <li class="c">Can't cast without selecting a region first</li>
+        <li class="c">Weaker "god holding power" fantasy</li>
+        <li class="c">3 taps to cast (tap region → Bless → specific power)</li>
+        <li class="c">Bottom sheet can feel utilitarian, not divine</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- COMBO 3: Dual-Arc + Eye at Apex -->
+<!-- ============================================ -->
+<div class="combo-section" style="border-color: #d4a857;">
+  <div class="combo-header">
+    <span class="combo-num">Combo 3</span>
+    <span class="combo-title">Dual-Arc FAB with Eye at Apex</span>
+    <span class="rec-badge">RECOMMENDED</span>
+  </div>
+  <p class="combo-tagline">Everything divine through one interface. Powers arc outward, divine sight crowns the top. FAB glows purple when overlay is on.</p>
+
+  <div class="phones-row">
+    <!-- State 1: Idle -->
+    <div class="phone-col">
+      <div class="phone-label">Idle</div>
+      <div class="phone-sublabel">FAB with subtle purple ring when overlay was on</div>
+      <div class="phone" id="c3idle">
+        <div class="notch"></div>
+        <div class="map">
+          <div class="oc oc1"></div><div class="oc oc2"></div>
+          <div class="mr mr1"></div><div class="mr mr2"></div><div class="mr mr3"></div>
+          <div class="mr mr4"></div><div class="mr mr5"></div><div class="mr mr6"></div><div class="mr mr7"></div>
+          <div class="tr tr1"></div><div class="tr tr2"></div>
+          <div class="cd cd1"></div><div class="cd cd2"></div><div class="cd cd3"></div>
+          <div class="cd cd4"></div><div class="cd cd5"></div><div class="cd cd6"></div>
+        </div>
+        <div class="hud">
+          <div class="hud-l"><div class="spd">2×</div></div>
+          <div class="hud-c"><div class="yr">1743</div><div class="era">Enlightenment</div></div>
+          <div class="hud-r"><div class="nrg">⚡14</div></div>
+        </div>
+        <div class="fab">✦</div>
+        <div class="ann" style="bottom:30px; right:70px;"><div class="ann-box">One button = all divine power →</div></div>
+        <div class="ann" style="top:26px; right:10px;"><div class="ann-box">No eye in HUD — clean</div></div>
+        <div class="home-ind"></div>
+      </div>
+    </div>
+
+    <!-- State 2: FAB open → dual arcs + eye at apex -->
+    <div class="phone-col">
+      <div class="phone-label">Powers Open</div>
+      <div class="phone-sublabel">Dual arcs + eye at the crown</div>
+      <div class="phone" id="c3arcs">
+        <div class="notch"></div>
+        <div class="map">
+          <div class="oc oc1"></div><div class="oc oc2"></div>
+          <div class="mr mr1"></div><div class="mr mr2"></div><div class="mr mr3"></div>
+          <div class="mr mr4"></div><div class="mr mr5"></div><div class="mr mr6"></div><div class="mr mr7"></div>
+          <div class="tr tr1"></div><div class="tr tr2"></div>
+          <div class="cd cd1"></div><div class="cd cd2"></div><div class="cd cd3"></div>
+          <div class="cd cd4"></div><div class="cd cd5"></div><div class="cd cd6"></div>
+        </div>
+        <div class="hud">
+          <div class="hud-l"><div class="spd">2×</div></div>
+          <div class="hud-c"><div class="yr">1743</div><div class="era">Enlightenment</div></div>
+          <div class="hud-r"><div class="nrg">⚡14</div></div>
+        </div>
+        <div class="fab" style="opacity:0.6;">✦</div>
+        <div class="arc-container show">
+          <!-- Blessings arc (left) -->
+          <div class="arc-btn ab b1">🌾</div>
+          <div class="arc-btn ab b2">💡</div>
+          <div class="arc-btn ab b3">✨</div>
+          <div class="arc-btn ab b4">🙏</div>
+          <div class="arc-btn ab b5">🛡</div>
+          <div class="arc-btn ab b6">👑</div>
+          <!-- Disasters arc (right) -->
+          <div class="arc-btn ad d1">🌋</div>
+          <div class="arc-btn ad d2">🌊</div>
+          <div class="arc-btn ad d3">☠️</div>
+          <!-- Eye at apex -->
+          <div class="arc-btn ae eye-apex">👁</div>
+        </div>
+        <div class="ann" style="bottom:220px; left:10px;"><div class="ann-box">Blessings (gold) ↗</div></div>
+        <div class="ann" style="bottom:195px; right:5px;"><div class="ann-box">← Disasters (red)</div></div>
+        <div class="ann" style="bottom:245px; left:50%; transform:translateX(-50%);"><div class="ann-box">👁 Eye crowns the arc ↗</div></div>
+        <div class="home-ind"></div>
+      </div>
+    </div>
+
+    <!-- State 3: Overlay on (FAB has purple ring) -->
+    <div class="phone-col">
+      <div class="phone-label">Overlay Active</div>
+      <div class="phone-sublabel">FAB glows purple — overlay state always visible</div>
+      <div class="phone ov-on" id="c3ov">
+        <div class="notch"></div>
+        <div class="map">
+          <div class="oc oc1"></div><div class="oc oc2"></div>
+          <div class="mr mr1"></div><div class="mr mr2"></div><div class="mr mr3"></div>
+          <div class="mr mr4"></div><div class="mr mr5"></div><div class="mr mr6"></div><div class="mr mr7"></div>
+          <div class="tr tr1"></div><div class="tr tr2"></div>
+          <div class="cd cd1"></div><div class="cd cd2"></div><div class="cd cd3"></div>
+          <div class="cd cd4"></div><div class="cd cd5"></div><div class="cd cd6"></div>
+          <div class="ov-layer">
+            <div class="rh rh1"></div><div class="rh rh2"></div><div class="rh rh3"></div><div class="rh rh4"></div>
+            <div class="atk atk1">⟶</div><div class="atk atk2">⟶</div>
+            <div class="tn-brd tn1"></div>
+          </div>
+        </div>
+        <div class="hud">
+          <div class="hud-l"><div class="spd">2×</div></div>
+          <div class="hud-c"><div class="yr">1743</div><div class="era">Enlightenment</div></div>
+          <div class="hud-r"><div class="nrg">⚡14</div></div>
+        </div>
+        <div class="fab has-overlay-ring">✦</div>
+        <div class="lp">
+          <div class="lb on">Religion</div>
+          <div class="lb">Military</div>
+          <div class="lb">Trade</div>
+          <div class="lb">Science</div>
+        </div>
+        <div class="ann" style="bottom:28px; right:70px;"><div class="ann-box">Purple ring = overlay on →</div></div>
+        <div class="ann" style="bottom:95px; left:10px;"><div class="ann-box">Layer picker while active</div></div>
+        <div class="home-ind"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="combo-analysis">
+    <div class="ca-card">
+      <h4>Strengths</h4>
+      <ul>
+        <li class="p">One button = entire divine interface (powers + sight)</li>
+        <li class="p">Cleanest HUD — zero extra buttons</li>
+        <li class="p">Mid-cast overlay access — eye visible alongside powers</li>
+        <li class="p">Both power types visible at once (no toggle)</li>
+        <li class="p">FAB glow = always-visible overlay state indicator</li>
+        <li class="p">Thematically strongest: "the god's eye crowns divine power"</li>
+      </ul>
+    </div>
+    <div class="ca-card">
+      <h4>Weaknesses</h4>
+      <ul>
+        <li class="c">Eye requires 1 tap to reach (open FAB first)</li>
+        <li class="c">12 power icons + eye = 13 buttons when open — must test spacing</li>
+        <li class="c">Left-hand mode must mirror the entire arc layout</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- COMPARISON TABLE -->
+<!-- ============================================ -->
+<div class="cmp">
+  <h2>Side-by-Side Comparison</h2>
+  <table>
+    <tr>
+      <th>Criterion</th>
+      <th>Combo 1: Arc + HUD Eye</th>
+      <th>Combo 2: Target-First</th>
+      <th class="winner">Combo 3: Arc + Apex Eye</th>
+    </tr>
+    <tr>
+      <td>Buttons on screen (idle)</td>
+      <td>2 (FAB + eye)</td>
+      <td>1 (FAB is eye)</td>
+      <td class="winner">1 (FAB)</td>
+    </tr>
+    <tr>
+      <td>HUD clutter</td>
+      <td><span class="mi">Eye icon added</span></td>
+      <td><span class="hi">None</span></td>
+      <td class="winner"><span class="hi">None</span></td>
+    </tr>
+    <tr>
+      <td>Taps to cast a power</td>
+      <td><span class="hi">2</span> (FAB → power)</td>
+      <td><span class="lo">3</span> (region → Bless → power)</td>
+      <td class="winner"><span class="hi">2</span> (FAB → power)</td>
+    </tr>
+    <tr>
+      <td>Taps to toggle overlay</td>
+      <td><span class="hi">1</span> (eye)</td>
+      <td><span class="hi">1</span> (FAB)</td>
+      <td class="winner"><span class="mi">2</span> (FAB → eye)</td>
+    </tr>
+    <tr>
+      <td>Mid-cast overlay access</td>
+      <td><span class="lo">No</span> — must close arcs</td>
+      <td><span class="mi">N/A</span> — no arcs</td>
+      <td class="winner"><span class="hi">Yes</span> — eye in arc</td>
+    </tr>
+    <tr>
+      <td>"God fantasy" feel</td>
+      <td><span class="hi">Strong</span></td>
+      <td><span class="lo">Weak</span> — utilitarian</td>
+      <td class="winner"><span class="hi">Strongest</span></td>
+    </tr>
+    <tr>
+      <td>Discoverability (overlay)</td>
+      <td><span class="hi">Immediate</span></td>
+      <td><span class="hi">Immediate</span></td>
+      <td class="winner"><span class="mi">On first FAB open</span></td>
+    </tr>
+    <tr>
+      <td>Proactive casting</td>
+      <td><span class="hi">Yes</span> — open FAB anytime</td>
+      <td><span class="lo">No</span> — need region first</td>
+      <td class="winner"><span class="hi">Yes</span> — open FAB anytime</td>
+    </tr>
+    <tr>
+      <td>Unified divine interface</td>
+      <td><span class="lo">No</span> — split across two buttons</td>
+      <td><span class="mi">Partial</span> — FAB is eye, powers elsewhere</td>
+      <td class="winner"><span class="hi">Yes</span> — everything in one</td>
+    </tr>
+    <tr>
+      <td>Accessibility (screen reader)</td>
+      <td><span class="hi">Good</span></td>
+      <td><span class="hi">Good</span></td>
+      <td class="winner"><span class="hi">Good</span></td>
+    </tr>
+    <tr>
+      <td>Implementation complexity</td>
+      <td><span class="hi">Low</span></td>
+      <td><span class="mi">Medium</span></td>
+      <td class="winner"><span class="mi">Medium</span></td>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>
