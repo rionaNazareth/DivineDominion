@@ -114,18 +114,17 @@ Write `docs/session/SESSION_N_SUMMARY.md`:
 
 ### Step 7 — Commit
 
-```
-session N: [phase name]
+**This project runs on Windows/PowerShell. Heredoc (`<<'EOF'`) does NOT work. Use the PowerShell variable approach every time:**
 
-[1-2 sentence description]
-
-Checklist:
-[x] npm test passes
-[x] types match game.ts
-[x] constants synced
-[x] no Math.random in simulation/
-[x] handoff summary written
+```powershell
+$msg = "session N: phase name`n`nOne or two sentence description.`n`nChecklist:`n[x] npm test passes`n[x] types match game.ts`n[x] constants synced`n[x] no Math.random in simulation/`n[x] handoff summary written"
+git add <files>
+git commit -m $msg
 ```
+
+- Use `` `n `` for newlines inside the PowerShell string (backtick-n, NOT `\n`).
+- Do NOT use `&&` to chain commands — use `;` or separate Shell calls.
+- Do NOT use `cat <<'EOF'` heredoc — it is bash-only and will cause a parse error.
 
 ### Step 8 — Push to Remote
 
