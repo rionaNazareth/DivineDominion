@@ -31,11 +31,14 @@
 - `src/simulation/voices.ts` — Fixed `!= null` guard on `currentPetition` (strict `!== null` failed when set to `undefined`; fixed to loose equality)
 - `package.json` — Added `playtest:headless`, `playtest:analyze`, `playtest:visual`, `playtest:all` npm scripts
 
+### Additional files (gap resolution)
+- `src/systems/sharing.ts` — Now includes `renderCommandmentCardToPNG()` and `renderCommandmentCardToBlob()`: full HTML Canvas 2D renderer producing a 1080×1920 PNG card (gold/dark theme, 10 commandments list, stats row, ending narrative quote, footer). `shareCardAsImage()` uses Web Share API files[] for native image sharing with text-only fallback.
+- `src/systems/bootstrap.ts` — `bootstrap()` entry point wires analytics from `VITE_POSTHOG_KEY` env variable and performance manager at app startup. `handleAnalyticsOptIn/Out()` and `handleQualityChange()` called from Settings screen.
+- `src/ui/settings-store.ts` — Added `analyticsOptIn: boolean | null` (null = not yet asked) and `qualityOverride: 'auto' | 'normal' | 'low'` to `GameSettings`. Both persisted to localStorage.
+- `package.json` / `package-lock.json` — `@capacitor/splash-screen`, `@capacitor/status-bar`, `@capacitor/keyboard` installed.
+
 ## Known Gaps
-- `npm run playtest:headless` runs 1000 full games (will take hours on a real machine — designed for the work laptop, not CI)
-- Commandment card PNG generation (visual sharing) deferred — current sharing builds data+text representations; canvas image generation requires Phaser integration (Phase 7 territory)
-- Analytics PostHog API key must be provided at runtime via `initAnalytics({ apiKey: '...', enabled: true })`
-- Capacitor `@capacitor/splash-screen` and `@capacitor/status-bar` plugins need `npm install` before first mobile build (package.json already has `@capacitor/core`)
+- `npm run playtest:headless` runs 1000 full games (slow — designed for the work laptop, not CI)
 
 ## Decision Points for Human
 - None.
