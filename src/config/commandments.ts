@@ -463,7 +463,6 @@ export const UNLOCKABLE_COMMANDMENTS: Commandment[] = [
     {
       researchSpeed: 0.4,
       disasterResistance: -0.15,
-      faithDecayPerTick: 0.0,
     },
     [],
     { type: 'survive_past_year', year: 1900 },
