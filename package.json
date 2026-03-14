@@ -16,20 +16,23 @@
     "playtest:all": "tsx src/playtest/headless-runner.ts && playwright test"
   },
   "dependencies": {
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/keyboard": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.1",
     "d3-delaunay": "^6.0.4",
     "immer": "^10.1.1",
     "lz-string": "^1.5.0",
     "phaser": "^3.80.0",
-    "simplex-noise": "^4.0.1",
-    "@capacitor/core": "^6.0.0"
+    "simplex-noise": "^4.0.1"
   },
   "devDependencies": {
     "@capacitor/cli": "^6.0.0",
     "@playwright/test": "^1.49.0",
     "@types/node": "^25.5.0",
+    "@vitest/coverage-v8": "^2.1.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
-    "@vitest/coverage-v8": "^2.1.0",
     "vitest": "^2.1.0"
   }
 }

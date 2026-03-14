@@ -14,6 +14,8 @@ export interface GameSettings {
   highContrast: boolean;
   colorblindMode: 'off' | 'deuteranopia' | 'protanopia' | 'tritanopia';
   showTutorialTips: boolean;
+  analyticsOptIn: boolean | null; // null = not yet asked
+  qualityOverride: 'auto' | 'normal' | 'low';
 }
 
 const STORAGE_KEY = 'divine_dominion_settings';
@@ -29,6 +31,8 @@ export const DEFAULT_SETTINGS: Readonly<GameSettings> = {
   highContrast: false,
   colorblindMode: 'off',
   showTutorialTips: true,
+  analyticsOptIn: null,
+  qualityOverride: 'auto',
 };
 
 export function loadSettings(): GameSettings {
